@@ -1,86 +1,65 @@
-# SMM Project
+# Mosque Web Application
 
-A full-stack Social Media Management application with separate frontend and backend services.
+A full-stack web application for managing mosque operations.
 
-## Project Structure
-
-```
-├── frontend/           # React frontend application
-│   ├── src/           # Source files
-│   ├── public/        # Static files
-│   └── package.json   # Frontend dependencies
-│
-├── backend/           # Node.js backend application
-│   ├── routes/        # API routes
-│   ├── controllers/   # Route controllers
-│   ├── models/        # Database models
-│   ├── middleware/    # Custom middleware
-│   ├── utils/         # Utility functions
-│   ├── config/        # Configuration files
-│   └── package.json   # Backend dependencies
-```
+## Tech Stack
+- **Frontend:** React, Axios, Tailwind CSS
+- **Backend:** Node.js, Express.js
+- **Database:** MongoDB (Mongoose)
+- **Auth:** JWT, bcryptjs, Google OAuth
 
 ## Prerequisites
+- Node.js v18+
+- MongoDB (local or Atlas)
+- Git
 
-- Node.js (v14 or higher)
-- npm or yarn
-- MongoDB (if using MongoDB as database)
+## Local Setup
 
-## Setup Instructions
+### 1. Clone the repository
+```bash
+git clone https://github.com/thouseeffstdev/Mosque-webapplication.git
+cd Mosque-webapplication
+```
 
-### Backend Setup
+### 2. Backend Setup
+```bash
+cd backend
+npm install
+cp .env.example .env
+# Fill in your values in .env
+npm run dev
+# Backend runs on http://localhost:5000
+```
 
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
+### 3. Frontend Setup
+```bash
+cd frontend
+npm install
+npm start
+# Frontend runs on http://localhost:3000
+```
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+### 4. Seed Super Admin (first time only)
+```bash
+cd backend
+node createSuperAdmin.js
+# Creates: superadmin@example.com / password: 123
+```
 
-3. Create a `.env` file in the backend directory with required environment variables:
-   ```
-   PORT=5000
-   MONGODB_URI=your_mongodb_uri
-   JWT_SECRET=your_jwt_secret
-   ```
+## Environment Variables
+See `backend/.env.example` for required variables. Never commit `.env`.
 
-4. Start the backend server:
-   ```bash
-   npm start
-   ```
+## Git Branching Strategy
+```
+main         ← stable, production-ready
+  └── develop ← active development integration
+        ├── feature/announcements
+        ├── feature/events
+        └── feature/prayer-timings
+```
 
-### Frontend Setup
+## API Base URL
+`http://localhost:5000/api/auth`
 
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the development server:
-   ```bash
-   npm start
-   ```
-
-## Features
-
-- [List your main features here]
-
-## API Documentation
-
-[Add your API documentation here]
-
-## Contributing
-
-[Add contribution guidelines here]
-
-## License
-
-[Add your license information here] 
+## Project Status
+🚧 Under active development
