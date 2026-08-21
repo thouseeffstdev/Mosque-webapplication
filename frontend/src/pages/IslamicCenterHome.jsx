@@ -258,42 +258,77 @@ const IslamicCenterHome = () => {
       {/* ── HERO ── */}
       <section id="hero" ref={heroRef} style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0, backgroundImage: "url('/assets/hero-banner.jpg')", backgroundSize: "cover", backgroundPosition: "center" }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(15,23,42,0.82), rgba(15,23,42,0.6), rgba(15,23,42,0.92))" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(15,23,42,0.85), rgba(15,23,42,0.65), rgba(15,23,42,0.95))" }} />
 
-        <div style={{ position: "relative", zIndex: 10, textAlign: "center", color: "#fff", padding: "80px 24px 40px", maxWidth: 860, margin: "0 auto" }}>
-          <p style={{ color: "#eab308", fontSize: 20, letterSpacing: 6, marginBottom: 16, fontWeight: 300 }}>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم</p>
-          <h1 style={{ fontSize: "clamp(2.5rem, 8vw, 5rem)", fontWeight: 900, lineHeight: 1.1, marginBottom: 16, margin: "0 0 16px 0" }}>
+        {/* Animated background particles */}
+        <div className="absolute inset-0 pointer-events-none opacity-30">
+          <div className="absolute top-1/4 left-1/5 w-2 h-2 bg-yellow-300 rounded-full animate-twinkle" />
+          <div className="absolute top-1/3 right-1/4 w-3 h-3 bg-yellow-200 rounded-full animate-twinkle" style={{ animationDelay: "1s" }} />
+          <div className="absolute bottom-1/3 left-1/3 w-2 h-2 bg-white rounded-full animate-twinkle" style={{ animationDelay: "2s" }} />
+          <div className="absolute top-20 right-1/6 w-2.5 h-2.5 bg-yellow-400 rounded-full animate-twinkle" style={{ animationDelay: "1.5s" }} />
+        </div>
+
+        <div style={{ position: "relative", zIndex: 10, textAlign: "center", color: "#fff", padding: "100px 24px 60px", maxWidth: 880, margin: "0 auto" }}>
+          
+          {/* Floating Logo Badge */}
+          <div className="animate-float mb-4 inline-block">
+            <img
+              src="/assets/logo.jpg"
+              alt="Islamic Center Logo"
+              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-yellow-400 object-cover mx-auto shadow-2xl shadow-yellow-500/30 ring-4 ring-yellow-400/20"
+            />
+          </div>
+
+          <p style={{ color: "#eab308", fontSize: 22, letterSpacing: 6, marginBottom: 16, fontWeight: 400 }} className="animate-pulse">
+            بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم
+          </p>
+
+          <h1 style={{ fontSize: "clamp(2.5rem, 8vw, 5.2rem)", fontWeight: 900, lineHeight: 1.1, marginBottom: 16, margin: "0 0 16px 0" }}>
             Islamic Center
-            <span style={{ display: "block", color: "#eab308" }}>of Pooler</span>
+            <span style={{ display: "block", color: "#eab308", textShadow: "0 0 30px rgba(234,179,8,0.3)" }}>of Pooler</span>
           </h1>
-          <p style={{ fontSize: 18, color: "#d1d5db", maxWidth: 600, margin: "0 auto 12px", lineHeight: 1.7 }}>
+
+          <p style={{ fontSize: 18, color: "#d1d5db", maxWidth: 620, margin: "0 auto 16px", lineHeight: 1.7 }}>
             A welcoming home for the Muslim community of Pooler, Georgia. Rooted in faith. United in community. Serving with purpose.
           </p>
-          <p style={{ color: "#fde68a", fontSize: 14, marginBottom: 40, fontWeight: 500 }}>📍 Pooler, Georgia &nbsp;·&nbsp; Est. 2012</p>
 
-          <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-            <button onClick={() => scrollTo("prayer-times")}
-              style={{ background: "#eab308", color: "#0f172a", fontWeight: 800, padding: "14px 32px", borderRadius: 9999, border: "none", cursor: "pointer", fontSize: 16 }}>
+          <p style={{ color: "#fde68a", fontSize: 14, marginBottom: 36, fontWeight: 600 }}>
+            📍 Pooler, Georgia &nbsp;·&nbsp; Est. 2012
+          </p>
+
+          {/* Call to Action Buttons */}
+          <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap", marginBottom: 36 }}>
+            <button
+              onClick={() => scrollTo("prayer-times")}
+              style={{ background: "#eab308", color: "#0f172a", fontWeight: 800, padding: "15px 36px", borderRadius: 9999, border: "none", cursor: "pointer", fontSize: 16 }}
+              className="transform hover:scale-105 hover:shadow-2xl hover:shadow-yellow-500/40 transition-all duration-300 active:scale-95"
+            >
               🕌 Daily Prayer Times
             </button>
-            <button onClick={() => scrollTo("events")}
-              style={{ background: "rgba(255,255,255,0.12)", color: "#fff", fontWeight: 600, padding: "14px 32px", borderRadius: 9999, border: "1px solid rgba(255,255,255,0.3)", cursor: "pointer", fontSize: 16, backdropFilter: "blur(8px)" }}>
+            <button
+              onClick={() => scrollTo("events")}
+              style={{ background: "rgba(255,255,255,0.12)", color: "#fff", fontWeight: 600, padding: "15px 36px", borderRadius: 9999, border: "1px solid rgba(255,255,255,0.3)", cursor: "pointer", fontSize: 16, backdropFilter: "blur(8px)" }}
+              className="transform hover:scale-105 hover:bg-white/20 hover:border-yellow-400/50 transition-all duration-300 active:scale-95"
+            >
               📅 Upcoming Events
             </button>
           </div>
 
-          {/* Live Weather & Time Capsule */}
-          <div className="flex flex-wrap items-center justify-center gap-3 mt-10">
+          {/* Live Weather & Time Capsule with hover lift */}
+          <div className="flex flex-wrap items-center justify-center gap-3">
             {/* Live Weather Widget */}
             {weather ? (
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 10, background: "rgba(15,23,42,0.65)", backdropFilter: "blur(12px)", border: "1px solid rgba(234,179,8,0.3)", borderRadius: 16, padding: "10px 20px" }}>
-                <span style={{ fontSize: 22 }}>
+              <div
+                style={{ display: "inline-flex", alignItems: "center", gap: 12, background: "rgba(15,23,42,0.75)", backdropFilter: "blur(14px)", border: "1px solid rgba(234,179,8,0.35)", borderRadius: 20, padding: "12px 22px" }}
+                className="transform hover:scale-105 transition-transform duration-300 shadow-xl shadow-black/40"
+              >
+                <span style={{ fontSize: 26 }} className="animate-float">
                   {getWeatherInfo(weather.weathercode, weather.is_day).icon}
                 </span>
                 <div style={{ textAlign: "left" }}>
-                  <p style={{ margin: 0, color: "#fff", fontWeight: 800, fontSize: 14, lineHeight: 1.1 }}>
+                  <p style={{ margin: 0, color: "#fff", fontWeight: 800, fontSize: 15, lineHeight: 1.1 }}>
                     {Math.round(weather.temperature)}°F
-                    <span style={{ color: "#eab308", fontSize: 12, fontWeight: 600, marginLeft: 6 }}>
+                    <span style={{ color: "#eab308", fontSize: 12, fontWeight: 700, marginLeft: 6 }}>
                       {getWeatherInfo(weather.weathercode, weather.is_day).label}
                     </span>
                   </p>
@@ -303,24 +338,27 @@ const IslamicCenterHome = () => {
                 </div>
               </div>
             ) : (
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(15,23,42,0.5)", borderRadius: 16, padding: "8px 16px", fontSize: 12, color: "#9ca3af" }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(15,23,42,0.5)", borderRadius: 20, padding: "10px 18px", fontSize: 12, color: "#9ca3af" }}>
                 <span>🌤️</span>
                 <span>Loading Pooler weather...</span>
               </div>
             )}
 
             {/* Live Clock & Next Prayer */}
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 10, background: "rgba(15,23,42,0.65)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 16, padding: "10px 20px" }}>
-              <div style={{ width: 8, height: 8, background: "#4ade80", borderRadius: "50%", animation: "pulse 2s infinite" }} />
+            <div
+              style={{ display: "inline-flex", alignItems: "center", gap: 12, background: "rgba(15,23,42,0.75)", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,0.18)", borderRadius: 20, padding: "12px 22px" }}
+              className="transform hover:scale-105 transition-transform duration-300 shadow-xl shadow-black/40"
+            >
+              <div style={{ width: 10, height: 10, background: "#4ade80", borderRadius: "50%", animation: "pulse 2s infinite" }} />
               <div style={{ textAlign: "left" }}>
-                <p style={{ margin: 0, color: "#fff", fontWeight: 700, fontSize: 13, lineHeight: 1.1 }}>
+                <p style={{ margin: 0, color: "#fff", fontWeight: 800, fontSize: 14, lineHeight: 1.1 }}>
                   {now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                   <span style={{ color: "#9ca3af", fontSize: 11, fontWeight: 400, marginLeft: 6 }}>
                     {now.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
                   </span>
                 </p>
                 {nextPrayer && prayerTimes[nextPrayer] && (
-                  <p style={{ margin: 0, color: "#fde68a", fontSize: 11, fontWeight: 600 }}>
+                  <p style={{ margin: 0, color: "#fde68a", fontSize: 11, fontWeight: 700 }}>
                     Next Prayer: {nextPrayer} at {to12(prayerTimes[nextPrayer])}
                   </p>
                 )}
@@ -329,18 +367,18 @@ const IslamicCenterHome = () => {
           </div>
         </div>
 
-        <div style={{ position: "absolute", bottom: 32, left: "50%", transform: "translateX(-50%)", textAlign: "center", color: "rgba(255,255,255,0.4)", animation: "bounce 2s infinite" }}>
-          <div style={{ fontSize: 11, marginBottom: 4 }}>scroll</div>
-          <div style={{ fontSize: 18 }}>↓</div>
+        <div style={{ position: "absolute", bottom: 24, left: "50%", transform: "translateX(-50%)", textAlign: "center", color: "rgba(255,255,255,0.4)", animation: "bounce 2s infinite" }}>
+          <div style={{ fontSize: 10, marginBottom: 2 }}>scroll</div>
+          <div style={{ fontSize: 16 }}>↓</div>
         </div>
       </section>
 
       {/* ── ABOUT ── */}
-      <section id="about" style={{ padding: "80px 24px", background: "#fff" }}>
+      <section id="about" style={{ padding: "90px 24px", background: "#fff" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 48, alignItems: "center" }}>
           <div>
             <span style={{ color: "#eab308", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 4 }}>About Us</span>
-            <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.5rem)", fontWeight: 900, color: "#0f172a", margin: "12px 0 20px", lineHeight: 1.2 }}>
+            <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 900, color: "#0f172a", margin: "12px 0 20px", lineHeight: 1.2 }}>
               A Community Built on <span style={{ color: "#eab308" }}>Faith & Brotherhood</span>
             </h2>
             <p style={{ color: "#6b7280", lineHeight: 1.8, marginBottom: 16 }}>
@@ -351,33 +389,38 @@ const IslamicCenterHome = () => {
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
               {[["500+", "Families"], ["12+", "Years Serving"], ["7", "Days a Week"]].map(([num, label]) => (
-                <div key={label} style={{ textAlign: "center", padding: 16, background: "#f9fafb", borderRadius: 16, border: "1px solid #f3f4f6" }}>
-                  <p style={{ fontSize: 24, fontWeight: 900, color: "#eab308", margin: "0 0 4px" }}>{num}</p>
-                  <p style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600, margin: 0 }}>{label}</p>
+                <div key={label} style={{ textAlign: "center", padding: 18, background: "#f9fafb", borderRadius: 16, border: "1px solid #f3f4f6" }} className="transform hover:scale-105 hover:shadow-md transition-all duration-300">
+                  <p style={{ fontSize: 26, fontWeight: 900, color: "#eab308", margin: "0 0 4px" }}>{num}</p>
+                  <p style={{ fontSize: 11, color: "#9ca3af", fontWeight: 700, margin: 0 }}>{label}</p>
                 </div>
               ))}
             </div>
           </div>
-          <div style={{ position: "relative" }}>
+          <div style={{ position: "relative" }} className="group">
             <div style={{ borderRadius: 24, overflow: "hidden", boxShadow: "0 25px 60px rgba(0,0,0,0.15)" }}>
-              <img src="/assets/hero-banner.jpg" alt="Islamic Center of Pooler" style={{ width: "100%", height: 380, objectFit: "cover" }} />
+              <img
+                src="/assets/hero-banner.jpg"
+                alt="Community"
+                style={{ width: "100%", height: 380, objectFit: "cover" }}
+                className="transform group-hover:scale-105 transition-transform duration-700"
+              />
             </div>
-            <div style={{ position: "absolute", bottom: -20, left: -20, background: "#eab308", color: "#0f172a", fontWeight: 900, borderRadius: 16, padding: "16px 20px", boxShadow: "0 10px 30px rgba(234,179,8,0.4)", textAlign: "center" }}>
-              <p style={{ fontSize: 28, margin: 0 }}>5</p>
-              <p style={{ fontSize: 11, margin: 0 }}>Daily<br />Prayers</p>
+            <div style={{ position: "absolute", bottom: -20, right: -20, background: "#0f172a", border: "2px solid #eab308", borderRadius: 18, padding: "16px 24px", color: "#fff", boxShadow: "0 20px 40px rgba(0,0,0,0.3)" }} className="animate-float-slow hidden sm:block">
+              <p style={{ fontSize: 24, fontWeight: 900, color: "#eab308", margin: 0 }}>All Welcome</p>
+              <p style={{ fontSize: 11, color: "#9ca3af", margin: 0, fontWeight: 600 }}>Daily 5 Salah · Jumu'ah · Classes</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* ── PRAYER TIMES ── */}
-      <section id="prayer-times" style={{ padding: "80px 24px", background: "#0f172a", position: "relative", overflow: "hidden" }}>
+      <section id="prayer-times" style={{ padding: "90px 24px", background: "#0f172a", position: "relative", overflow: "hidden" }}>
         <div style={{ maxWidth: 1000, margin: "0 auto", position: "relative", zIndex: 10 }}>
           <div style={{ textAlign: "center", marginBottom: 48 }}>
             <span style={{ color: "#eab308", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 4 }}>Salah Schedule</span>
-            <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.5rem)", fontWeight: 900, color: "#fff", margin: "12px 0 8px" }}>Daily Prayer Times</h2>
-            <p style={{ color: "#6b7280", fontSize: 13 }}>
-              {Object.keys(prayerTimes).length ? "Times for Pooler, GA · ISNA Method" : "⏳ Fetching prayer times..."}
+            <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 900, color: "#fff", margin: "12px 0 8px" }}>Daily Prayer Times</h2>
+            <p style={{ color: "#9ca3af", fontSize: 13 }}>
+              {Object.keys(prayerTimes).length ? "Live times for Pooler, GA · ISNA Calculation Method" : "⏳ Fetching prayer times..."}
             </p>
           </div>
 
@@ -385,28 +428,39 @@ const IslamicCenterHome = () => {
             {PRAYER_ORDER.map(name => {
               const isNext = name === nextPrayer;
               return (
-                <div key={name} style={{
-                  position: "relative",
-                  borderRadius: 20,
-                  padding: "24px 16px",
-                  textAlign: "center",
-                  background: isNext ? "#eab308" : "rgba(255,255,255,0.05)",
-                  border: isNext ? "1px solid #fbbf24" : "1px solid rgba(255,255,255,0.1)",
-                  transform: isNext ? "scale(1.05)" : "scale(1)",
-                  boxShadow: isNext ? "0 20px 40px rgba(234,179,8,0.3)" : "none",
-                  transition: "all 0.3s",
-                }}>
+                <div
+                  key={name}
+                  style={{
+                    position: "relative",
+                    borderRadius: 20,
+                    padding: "26px 16px",
+                    textAlign: "center",
+                    background: isNext ? "#eab308" : "rgba(255,255,255,0.05)",
+                    border: isNext ? "2px solid #fbbf24" : "1px solid rgba(255,255,255,0.1)",
+                    transform: isNext ? "scale(1.06)" : "scale(1)",
+                    transition: "all 0.3s ease",
+                  }}
+                  className={`${isNext ? "animate-pulse-glow z-10" : "hover:scale-105 hover:bg-white/10"}`}
+                >
                   {isNext && (
-                    <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", background: "#fff", color: "#ca8a04", fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 9999 }}>
-                      NEXT ▶
+                    <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", background: "#fff", color: "#0f172a", fontSize: 10, fontWeight: 900, padding: "3px 12px", borderRadius: 9999, boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}>
+                      NEXT PRAYER ▶
                     </div>
                   )}
-                  <div style={{ fontSize: 32, marginBottom: 8 }}>{PRAYER_ICONS[name]}</div>
-                  <p style={{ fontWeight: 800, fontSize: 13, textTransform: "uppercase", letterSpacing: 1, color: isNext ? "#0f172a" : "#d1d5db", marginBottom: 12, margin: "0 0 12px" }}>{name}</p>
-                  <p style={{ fontSize: 11, color: isNext ? "#78350f" : "#6b7280", margin: "0 0 2px", fontWeight: 600 }}>Adhan</p>
-                  <p style={{ fontWeight: 900, fontSize: 18, color: isNext ? "#0f172a" : "#fff", margin: "0 0 8px" }}>{to12(prayerTimes[name])}</p>
-                  <p style={{ fontSize: 11, color: isNext ? "#78350f" : "#6b7280", margin: "0 0 2px", fontWeight: 600 }}>Iqamah</p>
-                  <p style={{ fontWeight: 700, fontSize: 14, color: isNext ? "#0f172a" : "#eab308", margin: 0 }}>{IQAMAH[name]}</p>
+                  <div style={{ fontSize: 34, marginBottom: 8 }} className={isNext ? "animate-bounce" : ""}>
+                    {PRAYER_ICONS[name]}
+                  </div>
+                  <p style={{ fontWeight: 800, fontSize: 13, textTransform: "uppercase", letterSpacing: 1, color: isNext ? "#0f172a" : "#d1d5db", marginBottom: 12, margin: "0 0 12px" }}>
+                    {name}
+                  </p>
+                  <p style={{ fontSize: 11, color: isNext ? "#78350f" : "#6b7280", margin: "0 0 2px", fontWeight: 700 }}>Adhan</p>
+                  <p style={{ fontWeight: 900, fontSize: 19, color: isNext ? "#0f172a" : "#fff", margin: "0 0 8px" }}>
+                    {to12(prayerTimes[name])}
+                  </p>
+                  <p style={{ fontSize: 11, color: isNext ? "#78350f" : "#6b7280", margin: "0 0 2px", fontWeight: 700 }}>Iqamah</p>
+                  <p style={{ fontWeight: 800, fontSize: 15, color: isNext ? "#0f172a" : "#eab308", margin: 0 }}>
+                    {IQAMAH[name]}
+                  </p>
                 </div>
               );
             })}
