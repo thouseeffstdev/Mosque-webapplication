@@ -44,11 +44,12 @@ const {
 ////END Import masjidController////
 
 // Import prayerTimingController
-const 
-{
+const {
   updatePrayerTimings,
   getPrayerTimings,
-}= require("../controllers/prayerTimingController");
+  getAladhanTimings,
+  deletePrayerTimings,
+} = require("../controllers/prayerTimingController");
 ////END Import prayerTimingController////
 
 // Import eventController
@@ -103,6 +104,8 @@ router.post("/reactToAnnouncement", reactToAnnouncement);
 //prayerTimingController
 router.put("/updatePrayerTimings/:masjidId", updatePrayerTimings);
 router.get("/getPrayerTimings/:masjidId", getPrayerTimings);
+router.get("/getAladhanTimings/:masjidId", getAladhanTimings); // Fetch live auto-calculated times from Aladhan for fixed masjid coordinates
+router.delete("/deletePrayerTimings/:masjidId", deletePrayerTimings); // Reset admin override → fall back to Aladhan
 
 //eventController
 router.post("/createEvent", createEvent);
