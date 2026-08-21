@@ -1,6 +1,6 @@
 import React from 'react';
-import { Routes, Route,Navigate } from 'react-router-dom';
-import Home from '../pages/Home';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import IslamicCenterHome from '../pages/IslamicCenterHome';
 import Login from "../pages/Login";
 import UserDashboard from "../pages/UserDashboard";
 import MasjidsDashboard from "../pages/MasjidDashboard";
@@ -19,7 +19,7 @@ function AppRouter() {
           <Route path="/" element={<Navigate to="/home" replace />} />
         
         {/* Define other routes */}
-        <Route path="/home" element={<Home />} />
+        <Route path="/home" element={<IslamicCenterHome />} />
         <Route path="/user" element={<Login />} />      
         <Route path="/user/dashboard" element={<UserDashboard />} />
         <Route path="/user/masjidJoin" element={<MasjidJoin />} />

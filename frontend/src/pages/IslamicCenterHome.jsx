@@ -1,0 +1,461 @@
+import React, { useEffect, useState, useRef } from "react";
+
+/* ─── helpers ─── */
+const to12 = (t) => {
+  if (!t) return "--:--";
+  const [h, m] = t.split(":").map(Number);
+  const ampm = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 || 12;
+  return `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+};
+
+const PRAYER_ORDER = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
+
+const IQAMAH = {
+  Fajr:    "05:30 AM",
+  Dhuhr:   "01:30 PM",
+  Asr:     "05:00 PM",
+  Maghrib: "+5 min",
+  Isha:    "09:15 PM",
+};
+
+const PRAYER_ICONS = {
+  Fajr: "🌙", Dhuhr: "☀️", Asr: "🌤️", Maghrib: "🌇", Isha: "🌃",
+};
+
+const EVENTS = [
+  { title: "Jumu'ah Khutbah", date: "Every Friday", time: "1:30 PM", tag: "Weekly", color: "gold" },
+  { title: "Weekend Islamic School", date: "Every Saturday", time: "10:00 AM", tag: "Education", color: "blue" },
+  { title: "Quran Hifz Program", date: "Mon – Thu", time: "6:30 PM", tag: "Quran", color: "green" },
+  { title: "Sisters' Halaqah", date: "Every Sunday", time: "11:00 AM", tag: "Community", color: "purple" },
+  { title: "Youth Night", date: "2nd & 4th Saturday", time: "7:00 PM", tag: "Youth", color: "orange" },
+  { title: "Ramadan Iftaar Program", date: "During Ramadan", time: "Sunset", tag: "Ramadan", color: "gold" },
+];
+
+const SERVICES = [
+  { icon: "💍", title: "Matrimonial Services", desc: "Connecting Muslim singles within our community with proper Islamic guidance and family involvement." },
+  { icon: "🕌", title: "Funeral / Janazah", desc: "Janazah prayers, ghusl, and burial coordination. We are here for you in your time of need." },
+  { icon: "📖", title: "Quran Classes", desc: "Tajweed, Hifz, and Arabic classes for all ages — children through adults." },
+  { icon: "👦", title: "Youth Programs", desc: "Mentorship, sports, Islamic enrichment, and leadership programs for our next generation." },
+  { icon: "🤲", title: "Charity / Zakat", desc: "Zakat collection and distribution to those in need locally and globally." },
+  { icon: "🏫", title: "Weekend School", desc: "Full Islamic studies curriculum for K–12 students every Saturday morning." },
+];
+
+const TAG_COLORS = {
+  gold:   "bg-yellow-100 text-yellow-800 border-yellow-300",
+  blue:   "bg-blue-100 text-blue-800 border-blue-300",
+  green:  "bg-green-100 text-green-800 border-green-300",
+  purple: "bg-purple-100 text-purple-800 border-purple-300",
+  orange: "bg-orange-100 text-orange-800 border-orange-300",
+};
+
+/* ─── main component ─── */
+const IslamicCenterHome = () => {
+  const [scrolled, setScrolled]   = useState(false);
+  const [menuOpen, setMenuOpen]   = useState(false);
+  const [prayerTimes, setPrayerTimes] = useState({});
+  const [nextPrayer, setNextPrayer]   = useState(null);
+  const [now, setNow]             = useState(new Date());
+  const [email, setEmail]         = useState("");
+  const [subscribed, setSubscribed] = useState(false);
+  const heroRef = useRef(null);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    const fetchTimes = (lat, lon) => {
+      fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=2`)
+        .then(r => r.json())
+        .then(d => setPrayerTimes(d.data.timings))
+        .catch(() => {});
+    };
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => fetchTimes(coords.latitude, coords.longitude),
+      ()            => fetchTimes(32.1149, -81.2348) // Pooler, GA fallback
+    );
+  }, []);
+
+  useEffect(() => {
+    if (!Object.keys(prayerTimes).length) return;
+    const nowMins = now.getHours() * 60 + now.getMinutes();
+    for (const name of PRAYER_ORDER) {
+      const t = prayerTimes[name];
+      if (!t) continue;
+      const [h, m] = t.split(":").map(Number);
+      if (h * 60 + m > nowMins) { setNextPrayer(name); return; }
+    }
+    setNextPrayer("Fajr");
+  }, [prayerTimes, now]);
+
+  const scrollTo = (id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    setMenuOpen(false);
+  };
+
+  const NAV_LINKS = [
+    { label: "Home",         id: "hero" },
+    { label: "About Us",     id: "about" },
+    { label: "Prayer Times", id: "prayer-times" },
+    { label: "Services",     id: "services" },
+    { label: "Events",       id: "events" },
+    { label: "Contact",      id: "contact" },
+  ];
+
+  return (
+    <div style={{ fontFamily: "'Outfit', 'Poppins', sans-serif" }} className="bg-white text-gray-800">
+
+      {/* ── NAVBAR ── */}
+      <nav style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
+        backgroundColor: scrolled ? "#0f172a" : "transparent",
+        boxShadow: scrolled ? "0 4px 30px rgba(0,0,0,0.3)" : "none",
+        padding: scrolled ? "12px 0" : "20px 0",
+        transition: "all 0.3s ease",
+      }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <button onClick={() => scrollTo("hero")} style={{ display: "flex", alignItems: "center", gap: 12, background: "none", border: "none", cursor: "pointer" }}>
+            <img src="/assets/logo.jpg" alt="Logo" style={{ width: 44, height: 44, borderRadius: "50%", border: "2px solid #eab308", objectFit: "cover" }} />
+            <div style={{ textAlign: "left" }}>
+              <p style={{ color: "#fff", fontWeight: 800, fontSize: 14, margin: 0, lineHeight: 1 }}>Islamic Center</p>
+              <p style={{ color: "#eab308", fontWeight: 700, fontSize: 12, margin: 0, lineHeight: 1.4 }}>of Pooler</p>
+            </div>
+          </button>
+
+          {/* Desktop links */}
+          <div className="hidden lg:flex" style={{ alignItems: "center", gap: 28 }}>
+            {NAV_LINKS.map(l => (
+              <button key={l.id} onClick={() => scrollTo(l.id)}
+                style={{ color: "#d1d5db", background: "none", border: "none", cursor: "pointer", fontSize: 14, fontWeight: 500, transition: "color 0.2s" }}
+                onMouseOver={e => e.currentTarget.style.color = "#eab308"}
+                onMouseOut={e => e.currentTarget.style.color = "#d1d5db"}>
+                {l.label}
+              </button>
+            ))}
+            <button onClick={() => scrollTo("contact")}
+              style={{ background: "#eab308", color: "#0f172a", fontWeight: 800, padding: "10px 22px", borderRadius: 9999, border: "none", cursor: "pointer", fontSize: 14 }}
+              onMouseOver={e => e.currentTarget.style.background = "#fbbf24"}
+              onMouseOut={e => e.currentTarget.style.background = "#eab308"}>
+              💛 Donate
+            </button>
+          </div>
+
+          {/* Mobile burger */}
+          <button className="lg:hidden" onClick={() => setMenuOpen(!menuOpen)}
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 8 }}>
+            {[0,1,2].map(i => (
+              <div key={i} style={{ width: 24, height: 2, background: "#fff", marginBottom: i < 2 ? 5 : 0 }} />
+            ))}
+          </button>
+        </div>
+
+        {menuOpen && (
+          <div style={{ background: "#0f172a", borderTop: "1px solid rgba(255,255,255,0.1)", padding: "16px 24px", display: "flex", flexDirection: "column", gap: 12 }}>
+            {NAV_LINKS.map(l => (
+              <button key={l.id} onClick={() => scrollTo(l.id)}
+                style={{ color: "#d1d5db", background: "none", border: "none", cursor: "pointer", textAlign: "left", fontSize: 14, fontWeight: 500, padding: "4px 0" }}>
+                {l.label}
+              </button>
+            ))}
+            <button onClick={() => scrollTo("contact")}
+              style={{ background: "#eab308", color: "#0f172a", fontWeight: 800, padding: "10px", borderRadius: 9999, border: "none", cursor: "pointer" }}>
+              💛 Donate
+            </button>
+          </div>
+        )}
+      </nav>
+
+      {/* ── HERO ── */}
+      <section id="hero" ref={heroRef} style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0, backgroundImage: "url('/assets/hero-banner.jpg')", backgroundSize: "cover", backgroundPosition: "center" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(15,23,42,0.82), rgba(15,23,42,0.6), rgba(15,23,42,0.92))" }} />
+
+        <div style={{ position: "relative", zIndex: 10, textAlign: "center", color: "#fff", padding: "80px 24px 40px", maxWidth: 860, margin: "0 auto" }}>
+          <p style={{ color: "#eab308", fontSize: 20, letterSpacing: 6, marginBottom: 16, fontWeight: 300 }}>بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم</p>
+          <h1 style={{ fontSize: "clamp(2.5rem, 8vw, 5rem)", fontWeight: 900, lineHeight: 1.1, marginBottom: 16, margin: "0 0 16px 0" }}>
+            Islamic Center
+            <span style={{ display: "block", color: "#eab308" }}>of Pooler</span>
+          </h1>
+          <p style={{ fontSize: 18, color: "#d1d5db", maxWidth: 600, margin: "0 auto 12px", lineHeight: 1.7 }}>
+            A welcoming home for the Muslim community of Pooler, Georgia. Rooted in faith. United in community. Serving with purpose.
+          </p>
+          <p style={{ color: "#fde68a", fontSize: 14, marginBottom: 40, fontWeight: 500 }}>📍 Pooler, Georgia &nbsp;·&nbsp; Est. 2012</p>
+
+          <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
+            <button onClick={() => scrollTo("prayer-times")}
+              style={{ background: "#eab308", color: "#0f172a", fontWeight: 800, padding: "14px 32px", borderRadius: 9999, border: "none", cursor: "pointer", fontSize: 16 }}>
+              🕌 Daily Prayer Times
+            </button>
+            <button onClick={() => scrollTo("events")}
+              style={{ background: "rgba(255,255,255,0.12)", color: "#fff", fontWeight: 600, padding: "14px 32px", borderRadius: 9999, border: "1px solid rgba(255,255,255,0.3)", cursor: "pointer", fontSize: 16, backdropFilter: "blur(8px)" }}>
+              📅 Upcoming Events
+            </button>
+          </div>
+
+          <div style={{ marginTop: 48, display: "inline-flex", alignItems: "center", gap: 12, background: "rgba(255,255,255,0.1)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 16, padding: "12px 24px" }}>
+            <div style={{ width: 8, height: 8, background: "#4ade80", borderRadius: "50%", animation: "pulse 2s infinite" }} />
+            <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 13 }}>
+              {now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+              {" · "}
+              {now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+            </span>
+            {nextPrayer && prayerTimes[nextPrayer] && (
+              <span style={{ color: "#fde68a", fontSize: 13, fontWeight: 600 }}>
+                · Next: {nextPrayer} at {to12(prayerTimes[nextPrayer])}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div style={{ position: "absolute", bottom: 32, left: "50%", transform: "translateX(-50%)", textAlign: "center", color: "rgba(255,255,255,0.4)", animation: "bounce 2s infinite" }}>
+          <div style={{ fontSize: 11, marginBottom: 4 }}>scroll</div>
+          <div style={{ fontSize: 18 }}>↓</div>
+        </div>
+      </section>
+
+      {/* ── ABOUT ── */}
+      <section id="about" style={{ padding: "80px 24px", background: "#fff" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 48, alignItems: "center" }}>
+          <div>
+            <span style={{ color: "#eab308", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 4 }}>About Us</span>
+            <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.5rem)", fontWeight: 900, color: "#0f172a", margin: "12px 0 20px", lineHeight: 1.2 }}>
+              A Community Built on <span style={{ color: "#eab308" }}>Faith & Brotherhood</span>
+            </h2>
+            <p style={{ color: "#6b7280", lineHeight: 1.8, marginBottom: 16 }}>
+              The Islamic Center of Pooler serves as the spiritual and cultural heart of the Muslim community in Pooler, Georgia. Founded in 2012, our center has grown into a vibrant hub for worship, education, and community service.
+            </p>
+            <p style={{ color: "#6b7280", lineHeight: 1.8, marginBottom: 32 }}>
+              We welcome Muslims and non-Muslims alike, offering an open, inclusive environment rooted in the teachings of Islam — compassion, justice, and service to all of humanity.
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+              {[["500+", "Families"], ["12+", "Years Serving"], ["7", "Days a Week"]].map(([num, label]) => (
+                <div key={label} style={{ textAlign: "center", padding: 16, background: "#f9fafb", borderRadius: 16, border: "1px solid #f3f4f6" }}>
+                  <p style={{ fontSize: 24, fontWeight: 900, color: "#eab308", margin: "0 0 4px" }}>{num}</p>
+                  <p style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600, margin: 0 }}>{label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ position: "relative" }}>
+            <div style={{ borderRadius: 24, overflow: "hidden", boxShadow: "0 25px 60px rgba(0,0,0,0.15)" }}>
+              <img src="/assets/hero-banner.jpg" alt="Islamic Center of Pooler" style={{ width: "100%", height: 380, objectFit: "cover" }} />
+            </div>
+            <div style={{ position: "absolute", bottom: -20, left: -20, background: "#eab308", color: "#0f172a", fontWeight: 900, borderRadius: 16, padding: "16px 20px", boxShadow: "0 10px 30px rgba(234,179,8,0.4)", textAlign: "center" }}>
+              <p style={{ fontSize: 28, margin: 0 }}>5</p>
+              <p style={{ fontSize: 11, margin: 0 }}>Daily<br />Prayers</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── PRAYER TIMES ── */}
+      <section id="prayer-times" style={{ padding: "80px 24px", background: "#0f172a", position: "relative", overflow: "hidden" }}>
+        <div style={{ maxWidth: 1000, margin: "0 auto", position: "relative", zIndex: 10 }}>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <span style={{ color: "#eab308", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 4 }}>Salah Schedule</span>
+            <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.5rem)", fontWeight: 900, color: "#fff", margin: "12px 0 8px" }}>Daily Prayer Times</h2>
+            <p style={{ color: "#6b7280", fontSize: 13 }}>
+              {Object.keys(prayerTimes).length ? "Times for Pooler, GA · ISNA Method" : "⏳ Fetching prayer times..."}
+            </p>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16, marginBottom: 24 }}>
+            {PRAYER_ORDER.map(name => {
+              const isNext = name === nextPrayer;
+              return (
+                <div key={name} style={{
+                  position: "relative",
+                  borderRadius: 20,
+                  padding: "24px 16px",
+                  textAlign: "center",
+                  background: isNext ? "#eab308" : "rgba(255,255,255,0.05)",
+                  border: isNext ? "1px solid #fbbf24" : "1px solid rgba(255,255,255,0.1)",
+                  transform: isNext ? "scale(1.05)" : "scale(1)",
+                  boxShadow: isNext ? "0 20px 40px rgba(234,179,8,0.3)" : "none",
+                  transition: "all 0.3s",
+                }}>
+                  {isNext && (
+                    <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", background: "#fff", color: "#ca8a04", fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 9999 }}>
+                      NEXT ▶
+                    </div>
+                  )}
+                  <div style={{ fontSize: 32, marginBottom: 8 }}>{PRAYER_ICONS[name]}</div>
+                  <p style={{ fontWeight: 800, fontSize: 13, textTransform: "uppercase", letterSpacing: 1, color: isNext ? "#0f172a" : "#d1d5db", marginBottom: 12, margin: "0 0 12px" }}>{name}</p>
+                  <p style={{ fontSize: 11, color: isNext ? "#78350f" : "#6b7280", margin: "0 0 2px", fontWeight: 600 }}>Adhan</p>
+                  <p style={{ fontWeight: 900, fontSize: 18, color: isNext ? "#0f172a" : "#fff", margin: "0 0 8px" }}>{to12(prayerTimes[name])}</p>
+                  <p style={{ fontSize: 11, color: isNext ? "#78350f" : "#6b7280", margin: "0 0 2px", fontWeight: 600 }}>Iqamah</p>
+                  <p style={{ fontWeight: 700, fontSize: 14, color: isNext ? "#0f172a" : "#eab308", margin: 0 }}>{IQAMAH[name]}</p>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Jumu'ah card */}
+          <div style={{ background: "rgba(234,179,8,0.12)", border: "1px solid rgba(234,179,8,0.3)", borderRadius: 20, padding: "24px 32px", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 20 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              <span style={{ fontSize: 40 }}>🕌</span>
+              <div>
+                <p style={{ color: "#eab308", fontWeight: 800, fontSize: 18, margin: 0 }}>Jumu'ah — Friday Prayer</p>
+                <p style={{ color: "#6b7280", fontSize: 13, margin: 0 }}>Khutbah begins · Congregation follows</p>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 40 }}>
+              {[["Adhan", "1:15 PM", "#fff"], ["Iqamah", "1:30 PM", "#eab308"]].map(([label, time, color]) => (
+                <div key={label} style={{ textAlign: "center" }}>
+                  <p style={{ fontSize: 11, color: "#6b7280", margin: "0 0 4px", fontWeight: 600 }}>{label}</p>
+                  <p style={{ fontWeight: 900, fontSize: 22, color, margin: 0 }}>{time}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── EVENTS ── */}
+      <section id="events" style={{ padding: "80px 24px", background: "#f9fafb" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <span style={{ color: "#eab308", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 4 }}>Community</span>
+            <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.5rem)", fontWeight: 900, color: "#0f172a", margin: "12px 0 8px" }}>Announcements & Events</h2>
+            <p style={{ color: "#6b7280", fontSize: 14 }}>Stay connected with our weekly programs, special events, and community gatherings.</p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 24 }}>
+            {EVENTS.map(ev => (
+              <div key={ev.title} style={{ background: "#fff", borderRadius: 20, border: "1px solid #f3f4f6", padding: 24, transition: "all 0.3s", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", cursor: "pointer" }}
+                onMouseOver={e => { e.currentTarget.style.boxShadow = "0 20px 40px rgba(0,0,0,0.1)"; e.currentTarget.style.transform = "translateY(-4px)"; }}
+                onMouseOut={e => { e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.04)"; e.currentTarget.style.transform = "translateY(0)"; }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+                  <span className={`text-xs font-bold px-3 py-1 rounded-full border ${TAG_COLORS[ev.color]}`}>{ev.tag}</span>
+                  <span style={{ fontSize: 24 }}>{ev.color === "gold" ? "✨" : ev.color === "green" ? "📖" : ev.color === "blue" ? "🎓" : ev.color === "purple" ? "🌸" : "🌟"}</span>
+                </div>
+                <h3 style={{ fontWeight: 800, color: "#0f172a", fontSize: 18, margin: "0 0 12px" }}>{ev.title}</h3>
+                <p style={{ color: "#6b7280", fontSize: 13, margin: "0 0 4px" }}>📅 {ev.date}</p>
+                <p style={{ color: "#6b7280", fontSize: 13, margin: 0 }}>🕐 {ev.time}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SERVICES ── */}
+      <section id="services" style={{ padding: "80px 24px", background: "#fff" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <span style={{ color: "#eab308", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 4 }}>What We Offer</span>
+            <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.5rem)", fontWeight: 900, color: "#0f172a", margin: "12px 0 8px" }}>Community Services</h2>
+            <p style={{ color: "#6b7280", fontSize: 14 }}>Comprehensive Islamic services for every member of your family and community.</p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 24 }}>
+            {SERVICES.map(s => (
+              <div key={s.title} style={{ background: "#f9fafb", borderRadius: 20, border: "1px solid #f3f4f6", padding: 28, transition: "all 0.3s", cursor: "pointer" }}
+                onMouseOver={e => { e.currentTarget.style.background = "#0f172a"; e.currentTarget.style.boxShadow = "0 20px 40px rgba(15,23,42,0.2)"; e.currentTarget.style.transform = "translateY(-4px)"; Array.from(e.currentTarget.querySelectorAll("h3,p")).forEach(el => el.style.color = el.tagName === "H3" ? "#eab308" : "#9ca3af"); }}
+                onMouseOut={e => { e.currentTarget.style.background = "#f9fafb"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; Array.from(e.currentTarget.querySelectorAll("h3")).forEach(el => el.style.color = "#0f172a"); Array.from(e.currentTarget.querySelectorAll("p")).forEach(el => el.style.color = "#6b7280"); }}>
+                <div style={{ fontSize: 40, marginBottom: 16 }}>{s.icon}</div>
+                <h3 style={{ fontWeight: 800, color: "#0f172a", fontSize: 18, margin: "0 0 8px", transition: "color 0.3s" }}>{s.title}</h3>
+                <p style={{ color: "#6b7280", fontSize: 14, lineHeight: 1.7, margin: 0, transition: "color 0.3s" }}>{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── DONATE BANNER ── */}
+      <section style={{ padding: "64px 24px", background: "linear-gradient(135deg, #eab308, #fbbf24)", textAlign: "center" }}>
+        <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.5rem)", fontWeight: 900, color: "#0f172a", margin: "0 0 12px" }}>Support Your Masjid</h2>
+        <p style={{ color: "#1e293b", fontSize: 16, maxWidth: 520, margin: "0 auto 32px", lineHeight: 1.7 }}>
+          Your generous donations keep our doors open, our programs running, and our community thriving. Every dollar counts. Sadaqah Jariyah.
+        </p>
+        <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
+          <button style={{ background: "#0f172a", color: "#fff", fontWeight: 800, padding: "14px 32px", borderRadius: 9999, border: "none", cursor: "pointer", fontSize: 15 }}>
+            💳 Donate Online
+          </button>
+          <button style={{ background: "rgba(255,255,255,0.4)", color: "#0f172a", fontWeight: 800, padding: "14px 32px", borderRadius: 9999, border: "none", cursor: "pointer", fontSize: 15 }}>
+            📦 Donate Zakat
+          </button>
+        </div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer id="contact" style={{ background: "#060d1a", color: "#9ca3af" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "64px 24px 40px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 40 }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+              <img src="/assets/logo.jpg" alt="Logo" style={{ width: 40, height: 40, borderRadius: "50%", border: "2px solid #eab308", objectFit: "cover" }} />
+              <div>
+                <p style={{ color: "#fff", fontWeight: 800, fontSize: 13, margin: 0 }}>Islamic Center</p>
+                <p style={{ color: "#eab308", fontSize: 11, fontWeight: 700, margin: 0 }}>of Pooler</p>
+              </div>
+            </div>
+            <p style={{ fontSize: 13, lineHeight: 1.7, marginBottom: 20 }}>
+              Serving the Muslim community of Pooler, Georgia with faith, education, and compassion.
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              {["FB", "TW", "IG", "YT"].map(s => (
+                <a key={s} href="#" style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.08)", color: "#9ca3af", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, textDecoration: "none", transition: "all 0.2s" }}
+                  onMouseOver={e => { e.currentTarget.style.background = "#eab308"; e.currentTarget.style.color = "#0f172a"; }}
+                  onMouseOut={e => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.color = "#9ca3af"; }}>
+                  {s}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h4 style={{ color: "#fff", fontWeight: 800, marginBottom: 16, fontSize: 15 }}>Quick Links</h4>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+              {["About Us", "Prayer Times", "Events", "Services", "Donate", "Contact"].map(l => (
+                <li key={l}><a href="#" style={{ color: "#6b7280", textDecoration: "none", fontSize: 13, transition: "color 0.2s" }}
+                  onMouseOver={e => e.currentTarget.style.color = "#eab308"}
+                  onMouseOut={e => e.currentTarget.style.color = "#6b7280"}>› {l}</a></li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h4 style={{ color: "#fff", fontWeight: 800, marginBottom: 16, fontSize: 15 }}>Contact Us</h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, fontSize: 13 }}>
+              <p style={{ margin: 0 }}>📍 123 Pooler Parkway, Pooler, GA 31322</p>
+              <p style={{ margin: 0 }}>📞 <a href="tel:+19125550100" style={{ color: "#9ca3af", textDecoration: "none" }}>(912) 555-0100</a></p>
+              <p style={{ margin: 0 }}>✉️ <a href="mailto:info@icpooler.org" style={{ color: "#9ca3af", textDecoration: "none" }}>info@icpooler.org</a></p>
+              <p style={{ margin: 0 }}>🕌 Open daily for all 5 prayers</p>
+            </div>
+          </div>
+
+          <div>
+            <h4 style={{ color: "#fff", fontWeight: 800, marginBottom: 16, fontSize: 15 }}>Newsletter</h4>
+            <p style={{ fontSize: 13, lineHeight: 1.7, marginBottom: 16 }}>Stay updated with announcements, events, and prayer time changes.</p>
+            {subscribed ? (
+              <div style={{ background: "rgba(74,222,128,0.15)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 12, padding: 16, color: "#4ade80", fontSize: 13 }}>
+                ✅ JazakAllah Khair! You're subscribed.
+              </div>
+            ) : (
+              <form onSubmit={e => { e.preventDefault(); if (email) setSubscribed(true); }} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com"
+                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 12, padding: "10px 16px", color: "#fff", fontSize: 13, outline: "none" }} />
+                <button type="submit"
+                  style={{ background: "#eab308", color: "#0f172a", fontWeight: 800, padding: "10px", borderRadius: 12, border: "none", cursor: "pointer", fontSize: 14 }}>
+                  Subscribe
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+
+        <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", padding: "20px 24px", textAlign: "center", fontSize: 12, color: "#4b5563" }}>
+          <p style={{ margin: 0 }}>© {new Date().getFullYear()} Islamic Center of Pooler. All rights reserved.</p>
+          <p style={{ margin: "4px 0 0" }}>Built with 💛 for the Muslim community of Pooler, Georgia.</p>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default IslamicCenterHome;
