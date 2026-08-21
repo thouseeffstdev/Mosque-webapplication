@@ -11,28 +11,32 @@ import MasjidJoin from "../pages/MasjidJoin";
 import ManageUser from "../pages/ManageUser";
 import ViewDonations from "../pages/ViewDonations";
 import Events from "../pages/Events";
+import MatrimonialService from "../pages/MatrimonialService";
 
 function AppRouter() {
   return (
     <Routes>
-          {/* Redirect root path to /home */}
-          <Route path="/" element={<Navigate to="/home" replace />} />
-        
-        {/* Define other routes */}
-        <Route path="/home" element={<IslamicCenterHome />} />
-        <Route path="/user" element={<Login />} />      
-        <Route path="/user/dashboard" element={<UserDashboard />} />
-        <Route path="/user/masjidJoin" element={<MasjidJoin />} />
+      {/* Redirect root path to /home */}
+      <Route path="/" element={<Navigate to="/home" replace />} />
 
-        <Route path="/manageuser" element={<ManageUser />} />
-        <Route path="/view-donations" element={<ViewDonations />} />
-        <Route path="/masjid" element={<MasjidRegister />} />
-        <Route path="/masjid/dashboard" element={<MasjidsDashboard />} />
-        <Route path="/events" element={<Events />} />
+      {/* Define other routes */}
+      <Route path="/home" element={<IslamicCenterHome />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/user" element={<Login />} />
+      <Route path="/user/dashboard" element={<UserDashboard />} />
+      <Route path="/user/masjidJoin" element={<MasjidJoin />} />
 
-        <Route path="/superadmin" element={<SuperAdminLogin />} />
-        <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
-      
+      <Route path="/manageuser" element={<ManageUser />} />
+      <Route path="/view-donations" element={<ViewDonations />} />
+      <Route path="/masjid" element={<MasjidRegister />} />
+      <Route path="/masjid/dashboard" element={<MasjidsDashboard />} />
+      <Route path="/events" element={<Events />} />
+      <Route path="/matrimonial" element={<MatrimonialService />} />
+      <Route path="/nikah" element={<MatrimonialService />} />
+
+      <Route path="/superadmin" element={<SuperAdminLogin />} />
+      <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
+
     </Routes>
   );
 }

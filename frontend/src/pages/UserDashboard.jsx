@@ -6,6 +6,7 @@ import Toast from "../components/Toast";
 import useToast from "../hooks/useToast";
 import axios from "../api/axiosInstance";
 import UserPrayerTiming from "../components/UserPrayerTiming";
+import LiveWeatherWidget from "../components/LiveWeatherWidget";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -269,19 +270,27 @@ const UserDashboard = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 sm:gap-4 bg-white/50 p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-sm w-full lg:w-auto">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white text-lg sm:text-xl font-bold shadow-lg">
-                  {name ? name[0]?.toUpperCase() : "U"}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-white/70 backdrop-blur-sm p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-sm w-full lg:w-auto border border-slate-100">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white text-lg sm:text-xl font-bold shadow-lg">
+                    {name ? name[0]?.toUpperCase() : "U"}
+                  </div>
+                  <div>
+                    <h3 className="text-lg sm:text-xl font-semibold text-slate-900">Welcome, {name}</h3>
+                    <p className="text-xs sm:text-sm text-slate-500">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg sm:text-xl font-semibold text-slate-900">Welcome, {name}</h3>
-                  <p className="text-xs sm:text-sm text-slate-500">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                <div className="mt-2 sm:mt-0 sm:ml-4">
+                  <LiveWeatherWidget compact={true} />
                 </div>
               </div>
             </div>
 
-            {/* Stats Grid with Hover Effects */}
-            <div className="grid grid-cols-1   sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            {/* Stats Grid with Hover Effects including Live Weather Card */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+              {/* Live Weather Card on Dashboard */}
+              <LiveWeatherWidget />
+
               <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-indigo-100 transform hover:scale-105 transition-all duration-300 shadow-sm">
                 <div className="flex items-center gap-3 sm:gap-4 mb-2 sm:mb-3">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-indigo-500/10 flex items-center justify-center">
@@ -310,21 +319,6 @@ const UserDashboard = () => {
                   </div>
                 </div>
                 <p className="text-sm text-slate-500">Upcoming events</p>
-              </div>
-
-              <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-2xl p-6 border border-cyan-100 transform hover:scale-105 transition-all duration-300 shadow-sm">
-                <div className="flex items-center gap-4 mb-3">
-                  <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-cyan-600" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0 1 1 0 002 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-slate-700 font-medium">Prayer Times</h3>
-                    <p className="text-2xl font-bold text-slate-900">5</p>
-                  </div>
-                </div>
-                <p className="text-sm text-slate-500">Daily prayers</p>
               </div>
 
               <div className="bg-gradient-to-br from-rose-50 to-rose-100 rounded-2xl p-6 border border-rose-100 transform hover:scale-105 transition-all duration-300 shadow-sm">

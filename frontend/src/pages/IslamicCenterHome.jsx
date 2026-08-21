@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 /* ─── helpers ─── */
 const to12 = (t) => {
@@ -12,11 +13,11 @@ const to12 = (t) => {
 const PRAYER_ORDER = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
 
 const IQAMAH = {
-  Fajr:    "05:30 AM",
-  Dhuhr:   "01:30 PM",
-  Asr:     "05:00 PM",
+  Fajr: "05:30 AM",
+  Dhuhr: "01:30 PM",
+  Asr: "05:00 PM",
   Maghrib: "+5 min",
-  Isha:    "09:15 PM",
+  Isha: "09:15 PM",
 };
 
 const PRAYER_ICONS = {
@@ -33,7 +34,7 @@ const EVENTS = [
 ];
 
 const SERVICES = [
-  { icon: "💍", title: "Matrimonial Services", desc: "Connecting Muslim singles within our community with proper Islamic guidance and family involvement." },
+  { icon: "💍", title: "Matrimonial Services", desc: "Connecting Muslim singles within our community with proper Islamic guidance, photo profile, and family involvement.", link: "/nikah" },
   { icon: "🕌", title: "Funeral / Janazah", desc: "Janazah prayers, ghusl, and burial coordination. We are here for you in your time of need." },
   { icon: "📖", title: "Quran Classes", desc: "Tajweed, Hifz, and Arabic classes for all ages — children through adults." },
   { icon: "👦", title: "Youth Programs", desc: "Mentorship, sports, Islamic enrichment, and leadership programs for our next generation." },
@@ -42,21 +43,62 @@ const SERVICES = [
 ];
 
 const TAG_COLORS = {
-  gold:   "bg-yellow-100 text-yellow-800 border-yellow-300",
-  blue:   "bg-blue-100 text-blue-800 border-blue-300",
-  green:  "bg-green-100 text-green-800 border-green-300",
+  gold: "bg-yellow-100 text-yellow-800 border-yellow-300",
+  blue: "bg-blue-100 text-blue-800 border-blue-300",
+  green: "bg-green-100 text-green-800 border-green-300",
   purple: "bg-purple-100 text-purple-800 border-purple-300",
   orange: "bg-orange-100 text-orange-800 border-orange-300",
 };
 
+/* ─── Weather Helper (WMO Codes) ─── */
+const getWeatherInfo = (code, isDay = 1) => {
+  switch (code) {
+    case 0:
+      return { label: "Clear Sky", icon: isDay ? "☀️" : "🌙" };
+    case 1:
+      return { label: "Mainly Clear", icon: isDay ? "🌤️" : "🌙" };
+    case 2:
+      return { label: "Partly Cloudy", icon: "⛅" };
+    case 3:
+      return { label: "Overcast", icon: "☁️" };
+    case 45:
+    case 48:
+      return { label: "Foggy", icon: "🌫️" };
+    case 51:
+    case 53:
+    case 55:
+      return { label: "Light Drizzle", icon: "🌦️" };
+    case 61:
+    case 63:
+    case 65:
+      return { label: "Rain", icon: "🌧️" };
+    case 71:
+    case 73:
+    case 75:
+      return { label: "Snow", icon: "❄️" };
+    case 80:
+    case 81:
+    case 82:
+      return { label: "Rain Showers", icon: "🌧️" };
+    case 95:
+    case 96:
+    case 99:
+      return { label: "Thunderstorm", icon: "⛈️" };
+    default:
+      return { label: "Fair", icon: isDay ? "🌤️" : "🌙" };
+  }
+};
+
 /* ─── main component ─── */
 const IslamicCenterHome = () => {
-  const [scrolled, setScrolled]   = useState(false);
-  const [menuOpen, setMenuOpen]   = useState(false);
+  const navigate = useNavigate();
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [prayerTimes, setPrayerTimes] = useState({});
-  const [nextPrayer, setNextPrayer]   = useState(null);
-  const [now, setNow]             = useState(new Date());
-  const [email, setEmail]         = useState("");
+  const [nextPrayer, setNextPrayer] = useState(null);
+  const [weather, setWeather] = useState(null);
+  const [now, setNow] = useState(new Date());
+  const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
   const heroRef = useRef(null);
 
@@ -71,6 +113,7 @@ const IslamicCenterHome = () => {
     return () => clearInterval(t);
   }, []);
 
+  // Fetch Prayer Times & Live Weather
   useEffect(() => {
     const fetchTimes = (lat, lon) => {
       fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=2`)
@@ -78,9 +121,28 @@ const IslamicCenterHome = () => {
         .then(d => setPrayerTimes(d.data.timings))
         .catch(() => {});
     };
+
+    const fetchWeather = (lat, lon) => {
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit&windspeed_unit=mph`)
+        .then(r => r.json())
+        .then(d => {
+          if (d && d.current_weather) {
+            setWeather(d.current_weather);
+          }
+        })
+        .catch(() => {});
+    };
+
     navigator.geolocation.getCurrentPosition(
-      ({ coords }) => fetchTimes(coords.latitude, coords.longitude),
-      ()            => fetchTimes(32.1149, -81.2348) // Pooler, GA fallback
+      ({ coords }) => {
+        fetchTimes(coords.latitude, coords.longitude);
+        fetchWeather(coords.latitude, coords.longitude);
+      },
+      () => {
+        // Pooler, GA fallback coordinates
+        fetchTimes(32.1149, -81.2348);
+        fetchWeather(32.1149, -81.2348);
+      }
     );
   }, []);
 
@@ -102,12 +164,12 @@ const IslamicCenterHome = () => {
   };
 
   const NAV_LINKS = [
-    { label: "Home",         id: "hero" },
-    { label: "About Us",     id: "about" },
+    { label: "Home", id: "hero" },
+    { label: "About Us", id: "about" },
     { label: "Prayer Times", id: "prayer-times" },
-    { label: "Services",     id: "services" },
-    { label: "Events",       id: "events" },
-    { label: "Contact",      id: "contact" },
+    { label: "Services", id: "services" },
+    { label: "Events", id: "events" },
+    { label: "Contact", id: "contact" },
   ];
 
   return (
@@ -131,7 +193,7 @@ const IslamicCenterHome = () => {
           </button>
 
           {/* Desktop links */}
-          <div className="hidden lg:flex" style={{ alignItems: "center", gap: 28 }}>
+          <div className="hidden lg:flex" style={{ alignItems: "center", gap: 20 }}>
             {NAV_LINKS.map(l => (
               <button key={l.id} onClick={() => scrollTo(l.id)}
                 style={{ color: "#d1d5db", background: "none", border: "none", cursor: "pointer", fontSize: 14, fontWeight: 500, transition: "color 0.2s" }}
@@ -140,8 +202,20 @@ const IslamicCenterHome = () => {
                 {l.label}
               </button>
             ))}
+            <button onClick={() => navigate("/nikah")}
+              style={{ background: "rgba(234,179,8,0.15)", color: "#fde68a", border: "1px solid rgba(234,179,8,0.4)", fontWeight: 700, padding: "8px 16px", borderRadius: 9999, cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}
+              onMouseOver={e => { e.currentTarget.style.background = "#eab308"; e.currentTarget.style.color = "#0f172a"; }}
+              onMouseOut={e => { e.currentTarget.style.background = "rgba(234,179,8,0.15)"; e.currentTarget.style.color = "#fde68a"; }}>
+              <span>💍</span> Matrimonial
+            </button>
+            <button onClick={() => navigate("/login")}
+              style={{ background: "rgba(255,255,255,0.12)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)", fontWeight: 700, padding: "8px 16px", borderRadius: 9999, cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}
+              onMouseOver={e => { e.currentTarget.style.background = "rgba(255,255,255,0.2)"; e.currentTarget.style.borderColor = "#eab308"; }}
+              onMouseOut={e => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)"; }}>
+              <span>👤</span> Portal
+            </button>
             <button onClick={() => scrollTo("contact")}
-              style={{ background: "#eab308", color: "#0f172a", fontWeight: 800, padding: "10px 22px", borderRadius: 9999, border: "none", cursor: "pointer", fontSize: 14 }}
+              style={{ background: "#eab308", color: "#0f172a", fontWeight: 800, padding: "9px 20px", borderRadius: 9999, border: "none", cursor: "pointer", fontSize: 13 }}
               onMouseOver={e => e.currentTarget.style.background = "#fbbf24"}
               onMouseOut={e => e.currentTarget.style.background = "#eab308"}>
               💛 Donate
@@ -151,7 +225,7 @@ const IslamicCenterHome = () => {
           {/* Mobile burger */}
           <button className="lg:hidden" onClick={() => setMenuOpen(!menuOpen)}
             style={{ background: "none", border: "none", cursor: "pointer", padding: 8 }}>
-            {[0,1,2].map(i => (
+            {[0, 1, 2].map(i => (
               <div key={i} style={{ width: 24, height: 2, background: "#fff", marginBottom: i < 2 ? 5 : 0 }} />
             ))}
           </button>
@@ -165,6 +239,14 @@ const IslamicCenterHome = () => {
                 {l.label}
               </button>
             ))}
+            <button onClick={() => { setMenuOpen(false); navigate("/nikah"); }}
+              style={{ background: "rgba(234,179,8,0.2)", color: "#fde68a", border: "1px solid rgba(234,179,8,0.4)", fontWeight: 700, padding: "10px", borderRadius: 9999, cursor: "pointer", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <span>💍</span> Matrimonial & Nikah
+            </button>
+            <button onClick={() => { setMenuOpen(false); navigate("/login"); }}
+              style={{ background: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 700, padding: "10px", borderRadius: 9999, border: "none", cursor: "pointer", textAlign: "center" }}>
+              👤 Member Portal
+            </button>
             <button onClick={() => scrollTo("contact")}
               style={{ background: "#eab308", color: "#0f172a", fontWeight: 800, padding: "10px", borderRadius: 9999, border: "none", cursor: "pointer" }}>
               💛 Donate
@@ -200,18 +282,50 @@ const IslamicCenterHome = () => {
             </button>
           </div>
 
-          <div style={{ marginTop: 48, display: "inline-flex", alignItems: "center", gap: 12, background: "rgba(255,255,255,0.1)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 16, padding: "12px 24px" }}>
-            <div style={{ width: 8, height: 8, background: "#4ade80", borderRadius: "50%", animation: "pulse 2s infinite" }} />
-            <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 13 }}>
-              {now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-              {" · "}
-              {now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-            </span>
-            {nextPrayer && prayerTimes[nextPrayer] && (
-              <span style={{ color: "#fde68a", fontSize: 13, fontWeight: 600 }}>
-                · Next: {nextPrayer} at {to12(prayerTimes[nextPrayer])}
-              </span>
+          {/* Live Weather & Time Capsule */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mt-10">
+            {/* Live Weather Widget */}
+            {weather ? (
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 10, background: "rgba(15,23,42,0.65)", backdropFilter: "blur(12px)", border: "1px solid rgba(234,179,8,0.3)", borderRadius: 16, padding: "10px 20px" }}>
+                <span style={{ fontSize: 22 }}>
+                  {getWeatherInfo(weather.weathercode, weather.is_day).icon}
+                </span>
+                <div style={{ textAlign: "left" }}>
+                  <p style={{ margin: 0, color: "#fff", fontWeight: 800, fontSize: 14, lineHeight: 1.1 }}>
+                    {Math.round(weather.temperature)}°F
+                    <span style={{ color: "#eab308", fontSize: 12, fontWeight: 600, marginLeft: 6 }}>
+                      {getWeatherInfo(weather.weathercode, weather.is_day).label}
+                    </span>
+                  </p>
+                  <p style={{ margin: 0, color: "#9ca3af", fontSize: 11, fontWeight: 500 }}>
+                    📍 Pooler, GA · Wind: {weather.windspeed} mph
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(15,23,42,0.5)", borderRadius: 16, padding: "8px 16px", fontSize: 12, color: "#9ca3af" }}>
+                <span>🌤️</span>
+                <span>Loading Pooler weather...</span>
+              </div>
             )}
+
+            {/* Live Clock & Next Prayer */}
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 10, background: "rgba(15,23,42,0.65)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 16, padding: "10px 20px" }}>
+              <div style={{ width: 8, height: 8, background: "#4ade80", borderRadius: "50%", animation: "pulse 2s infinite" }} />
+              <div style={{ textAlign: "left" }}>
+                <p style={{ margin: 0, color: "#fff", fontWeight: 700, fontSize: 13, lineHeight: 1.1 }}>
+                  {now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                  <span style={{ color: "#9ca3af", fontSize: 11, fontWeight: 400, marginLeft: 6 }}>
+                    {now.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                  </span>
+                </p>
+                {nextPrayer && prayerTimes[nextPrayer] && (
+                  <p style={{ margin: 0, color: "#fde68a", fontSize: 11, fontWeight: 600 }}>
+                    Next Prayer: {nextPrayer} at {to12(prayerTimes[nextPrayer])}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -354,15 +468,98 @@ const IslamicCenterHome = () => {
             <p style={{ color: "#6b7280", fontSize: 14 }}>Comprehensive Islamic services for every member of your family and community.</p>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 24 }}>
-            {SERVICES.map(s => (
-              <div key={s.title} style={{ background: "#f9fafb", borderRadius: 20, border: "1px solid #f3f4f6", padding: 28, transition: "all 0.3s", cursor: "pointer" }}
-                onMouseOver={e => { e.currentTarget.style.background = "#0f172a"; e.currentTarget.style.boxShadow = "0 20px 40px rgba(15,23,42,0.2)"; e.currentTarget.style.transform = "translateY(-4px)"; Array.from(e.currentTarget.querySelectorAll("h3,p")).forEach(el => el.style.color = el.tagName === "H3" ? "#eab308" : "#9ca3af"); }}
-                onMouseOut={e => { e.currentTarget.style.background = "#f9fafb"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; Array.from(e.currentTarget.querySelectorAll("h3")).forEach(el => el.style.color = "#0f172a"); Array.from(e.currentTarget.querySelectorAll("p")).forEach(el => el.style.color = "#6b7280"); }}>
-                <div style={{ fontSize: 40, marginBottom: 16 }}>{s.icon}</div>
-                <h3 style={{ fontWeight: 800, color: "#0f172a", fontSize: 18, margin: "0 0 8px", transition: "color 0.3s" }}>{s.title}</h3>
-                <p style={{ color: "#6b7280", fontSize: 14, lineHeight: 1.7, margin: 0, transition: "color 0.3s" }}>{s.desc}</p>
-              </div>
-            ))}
+            {SERVICES.map(s => {
+              const isMatrimonial = s.title.toLowerCase().includes("matrimonial") || s.link === "/nikah";
+              return (
+                <div
+                  key={s.title}
+                  onClick={() => {
+                    if (s.link) navigate(s.link);
+                  }}
+                  style={{
+                    background: isMatrimonial ? "linear-gradient(to bottom right, #0f172a, #1e293b)" : "#f9fafb",
+                    borderRadius: 20,
+                    border: isMatrimonial ? "2px solid #eab308" : "1px solid #f3f4f6",
+                    padding: 28,
+                    transition: "all 0.3s",
+                    cursor: "pointer",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    boxShadow: isMatrimonial ? "0 10px 30px rgba(234,179,8,0.15)" : "none",
+                  }}
+                  onMouseOver={e => {
+                    e.currentTarget.style.transform = "translateY(-4px)";
+                    if (!isMatrimonial) {
+                      e.currentTarget.style.background = "#0f172a";
+                      e.currentTarget.style.boxShadow = "0 20px 40px rgba(15,23,42,0.2)";
+                      Array.from(e.currentTarget.querySelectorAll("h3,p")).forEach(el => el.style.color = el.tagName === "H3" ? "#eab308" : "#9ca3af");
+                    }
+                  }}
+                  onMouseOut={e => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    if (!isMatrimonial) {
+                      e.currentTarget.style.background = "#f9fafb";
+                      e.currentTarget.style.boxShadow = "none";
+                      Array.from(e.currentTarget.querySelectorAll("h3")).forEach(el => el.style.color = "#0f172a");
+                      Array.from(e.currentTarget.querySelectorAll("p")).forEach(el => el.style.color = "#6b7280");
+                    }
+                  }}
+                >
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                      <span style={{ fontSize: 38 }}>{s.icon}</span>
+                      {isMatrimonial && (
+                        <span style={{ background: "rgba(234,179,8,0.2)", border: "1px solid #eab308", color: "#fde68a", fontSize: 10, fontWeight: 800, padding: "3px 10px", borderRadius: 9999, textTransform: "uppercase" }}>
+                          Active Registry
+                        </span>
+                      )}
+                    </div>
+                    <h3 style={{ fontWeight: 800, color: isMatrimonial ? "#eab308" : "#0f172a", fontSize: 19, margin: "0 0 10px", transition: "color 0.3s" }}>
+                      {s.title}
+                    </h3>
+                    <p style={{ color: isMatrimonial ? "#d1d5db" : "#6b7280", fontSize: 14, lineHeight: 1.7, margin: 0, transition: "color 0.3s" }}>
+                      {s.desc}
+                    </p>
+                  </div>
+
+                  <div style={{ marginTop: 20, paddingTop: 16, borderTop: isMatrimonial ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(0,0,0,0.06)" }}>
+                    {s.link ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(s.link);
+                        }}
+                        style={{
+                          width: "100%",
+                          background: "#eab308",
+                          color: "#0f172a",
+                          fontWeight: 800,
+                          fontSize: 13,
+                          padding: "10px 16px",
+                          borderRadius: 12,
+                          border: "none",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 6,
+                          boxShadow: "0 4px 15px rgba(234,179,8,0.3)",
+                        }}
+                      >
+                        <span>💍</span>
+                        <span>Register & Submit Profile →</span>
+                      </button>
+                    ) : (
+                      <span style={{ fontSize: 13, fontWeight: 700, color: isMatrimonial ? "#eab308" : "#9ca3af", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                        Contact Masjid Office →
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -411,10 +608,36 @@ const IslamicCenterHome = () => {
           <div>
             <h4 style={{ color: "#fff", fontWeight: 800, marginBottom: 16, fontSize: 15 }}>Quick Links</h4>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
-              {["About Us", "Prayer Times", "Events", "Services", "Donate", "Contact"].map(l => (
-                <li key={l}><a href="#" style={{ color: "#6b7280", textDecoration: "none", fontSize: 13, transition: "color 0.2s" }}
-                  onMouseOver={e => e.currentTarget.style.color = "#eab308"}
-                  onMouseOut={e => e.currentTarget.style.color = "#6b7280"}>› {l}</a></li>
+              {[
+                { label: "About Us", link: "#about" },
+                { label: "Prayer Times", link: "#prayer-times" },
+                { label: "Matrimonial & Nikah", route: "/nikah" },
+                { label: "Community Services", link: "#services" },
+                { label: "Upcoming Events", link: "#events" },
+                { label: "Member Portal", route: "/login" },
+                { label: "Donate", link: "#contact" },
+              ].map(l => (
+                <li key={l.label}>
+                  {l.route ? (
+                    <button
+                      onClick={() => navigate(l.route)}
+                      style={{ background: "none", border: "none", padding: 0, color: "#6b7280", cursor: "pointer", fontSize: 13, transition: "color 0.2s", textAlign: "left" }}
+                      onMouseOver={e => e.currentTarget.style.color = "#eab308"}
+                      onMouseOut={e => e.currentTarget.style.color = "#6b7280"}
+                    >
+                      › {l.label}
+                    </button>
+                  ) : (
+                    <a
+                      href={l.link}
+                      style={{ color: "#6b7280", textDecoration: "none", fontSize: 13, transition: "color 0.2s" }}
+                      onMouseOver={e => e.currentTarget.style.color = "#eab308"}
+                      onMouseOut={e => e.currentTarget.style.color = "#6b7280"}
+                    >
+                      › {l.label}
+                    </a>
+                  )}
+                </li>
               ))}
             </ul>
           </div>
