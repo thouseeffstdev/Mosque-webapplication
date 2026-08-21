@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMasjidData } from '../../utils/storageHelper';
 import axios from '../../api/axiosInstance';
+import LiveWeatherWidget from '../LiveWeatherWidget';
 
 const WelcomeSection = ({ totalUsers }) => {
   const [upcomingEvents, setUpcomingEvents] = useState([]);
@@ -135,6 +136,8 @@ const WelcomeSection = ({ totalUsers }) => {
                 </button>
               </div>
             </div>
+            {/* Live Weather Card */}
+            <LiveWeatherWidget theme="dark" />
           </div>
         </div>
       </section>
