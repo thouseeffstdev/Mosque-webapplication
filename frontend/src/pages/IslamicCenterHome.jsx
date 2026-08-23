@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import Mosque3DWalkthrough from "../components/3d/Mosque3DWalkthrough";
+import Kaaba3DExperience from "../components/3d/Kaaba3DExperience";
 
 /* ─── helpers ─── */
 const to12 = (t) => {
@@ -35,9 +37,10 @@ const EVENTS = [
 
 const SERVICES = [
   { icon: "💍", title: "Matrimonial Services", desc: "Connecting Muslim singles within our community with proper Islamic guidance, photo profile, and family involvement.", link: "/nikah" },
+  { icon: "🌟", title: "Kids Islamic Quiz & Adventure", desc: "Interactive Islamic trivia for children and youth of all ages. Win badges, streak scores, and certificates!", link: "/kids-quiz" },
   { icon: "🕌", title: "Funeral / Janazah", desc: "Janazah prayers, ghusl, and burial coordination. We are here for you in your time of need." },
   { icon: "📖", title: "Quran Classes", desc: "Tajweed, Hifz, and Arabic classes for all ages — children through adults." },
-  { icon: "👦", title: "Youth Programs", desc: "Mentorship, sports, Islamic enrichment, and leadership programs for our next generation." },
+  { icon: "👦", title: "Youth Programs", desc: "Mentorship, sports, Islamic enrichment, and leadership programs for our next generation.", link: "/kids-quiz" },
   { icon: "🤲", title: "Charity / Zakat", desc: "Zakat collection and distribution to those in need locally and globally." },
   { icon: "🏫", title: "Weekend School", desc: "Full Islamic studies curriculum for K–12 students every Saturday morning." },
 ];
@@ -100,6 +103,7 @@ const IslamicCenterHome = () => {
   const [now, setNow] = useState(new Date());
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [active3DTab, setActive3DTab] = useState("kaaba"); // "kaaba" | "mosque"
   const heroRef = useRef(null);
 
   useEffect(() => {
@@ -166,6 +170,7 @@ const IslamicCenterHome = () => {
   const NAV_LINKS = [
     { label: "Home", id: "hero" },
     { label: "About Us", id: "about" },
+    { label: "3D Virtual Tour", id: "virtual-tour" },
     { label: "Prayer Times", id: "prayer-times" },
     { label: "Services", id: "services" },
     { label: "Events", id: "events" },
@@ -249,6 +254,12 @@ const IslamicCenterHome = () => {
                 {l.label}
               </button>
             ))}
+            <button onClick={() => navigate("/kids-quiz")}
+              style={{ background: "rgba(16,185,129,0.18)", color: "#6ee7b7", border: "1px solid rgba(16,185,129,0.4)", fontWeight: 700, padding: "8px 16px", borderRadius: 9999, cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}
+              onMouseOver={e => { e.currentTarget.style.background = "#10b981"; e.currentTarget.style.color = "#0f172a"; }}
+              onMouseOut={e => { e.currentTarget.style.background = "rgba(16,185,129,0.18)"; e.currentTarget.style.color = "#6ee7b7"; }}>
+              <span>🌟</span> Kids Quiz
+            </button>
             <button onClick={() => navigate("/nikah")}
               style={{ background: "rgba(234,179,8,0.15)", color: "#fde68a", border: "1px solid rgba(234,179,8,0.4)", fontWeight: 700, padding: "8px 16px", borderRadius: 9999, cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}
               onMouseOver={e => { e.currentTarget.style.background = "#eab308"; e.currentTarget.style.color = "#0f172a"; }}
@@ -286,6 +297,10 @@ const IslamicCenterHome = () => {
                 {l.label}
               </button>
             ))}
+            <button onClick={() => { setMenuOpen(false); navigate("/kids-quiz"); }}
+              style={{ background: "rgba(16,185,129,0.2)", color: "#6ee7b7", border: "1px solid rgba(16,185,129,0.4)", fontWeight: 700, padding: "10px", borderRadius: 9999, cursor: "pointer", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <span>🌟</span> Kids Islamic Quiz
+            </button>
             <button onClick={() => { setMenuOpen(false); navigate("/nikah"); }}
               style={{ background: "rgba(234,179,8,0.2)", color: "#fde68a", border: "1px solid rgba(234,179,8,0.4)", fontWeight: 700, padding: "10px", borderRadius: 9999, cursor: "pointer", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
               <span>💍</span> Matrimonial & Nikah
@@ -456,6 +471,89 @@ const IslamicCenterHome = () => {
               <p style={{ fontSize: 24, fontWeight: 900, color: "#eab308", margin: 0 }}>All Welcome</p>
               <p style={{ fontSize: 11, color: "#9ca3af", margin: 0, fontWeight: 600 }}>Daily 5 Salah · Jumu'ah · Classes</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 3D VIRTUAL TOUR & MAKKAH KAABA ── */}
+      <section id="virtual-tour" style={{ padding: "90px 24px 70px", background: "#060d1a", position: "relative" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 28 }}>
+            <span style={{ color: "#eab308", fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 4 }}>
+              Interactive 3D Spiritual Immersion
+            </span>
+            <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.7rem)", fontWeight: 900, color: "#fff", margin: "12px 0 10px" }}>
+              {active3DTab === "kaaba" ? (
+                <>The Holy Kaaba <span style={{ color: "#eab308" }}>Makkah al-Mukarramah in 3D</span></>
+              ) : (
+                <>Step Inside Our Masjid <span style={{ color: "#eab308" }}>in 3D</span></>
+              )}
+            </h2>
+            <p style={{ color: "#9ca3af", fontSize: 14, maxWidth: 660, margin: "0 auto", lineHeight: 1.7 }}>
+              {active3DTab === "kaaba"
+                ? "Experience the sacred Holy Kaaba, the golden Bab al-Kaaba, Hajar al-Aswad, and the continuous Tawaf orbit of pilgrims in Masjid al-Haram."
+                : "Experience walking through our grand arched entrance, past the marble pillars and glowing lanterns, directly into the prayer hall towards the Mihrab."}
+            </p>
+          </div>
+
+          {/* 3D Tab Switcher */}
+          <div style={{ display: "flex", justifyContent: "center", gap: 12, marginBottom: 28, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              onClick={() => setActive3DTab("kaaba")}
+              style={{
+                background: active3DTab === "kaaba" ? "linear-gradient(135deg, #eab308, #ca8a04)" : "rgba(255,255,255,0.06)",
+                color: active3DTab === "kaaba" ? "#0f172a" : "#d1d5db",
+                fontWeight: 900,
+                fontSize: 14,
+                padding: "12px 24px",
+                borderRadius: 9999,
+                border: active3DTab === "kaaba" ? "2px solid #fde047" : "1px solid rgba(255,255,255,0.15)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                boxShadow: active3DTab === "kaaba" ? "0 10px 30px rgba(234,179,8,0.35)" : "none",
+                transform: active3DTab === "kaaba" ? "scale(1.04)" : "scale(1)",
+                transition: "all 0.3s ease",
+              }}
+            >
+              <span style={{ fontSize: 18 }}>🕋</span>
+              <span>Holy Kaaba (Makkah)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActive3DTab("mosque")}
+              style={{
+                background: active3DTab === "mosque" ? "linear-gradient(135deg, #eab308, #ca8a04)" : "rgba(255,255,255,0.06)",
+                color: active3DTab === "mosque" ? "#0f172a" : "#d1d5db",
+                fontWeight: 900,
+                fontSize: 14,
+                padding: "12px 24px",
+                borderRadius: 9999,
+                border: active3DTab === "mosque" ? "2px solid #fde047" : "1px solid rgba(255,255,255,0.15)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                boxShadow: active3DTab === "mosque" ? "0 10px 30px rgba(234,179,8,0.35)" : "none",
+                transform: active3DTab === "mosque" ? "scale(1.04)" : "scale(1)",
+                transition: "all 0.3s ease",
+              }}
+            >
+              <span style={{ fontSize: 18 }}>🕌</span>
+              <span>Mosque Entrance Walkthrough</span>
+            </button>
+          </div>
+
+          {/* 3D Render Canvas Container */}
+          <div>
+            {active3DTab === "kaaba" ? (
+              <Kaaba3DExperience />
+            ) : (
+              <Mosque3DWalkthrough />
+            )}
           </div>
         </div>
       </section>
