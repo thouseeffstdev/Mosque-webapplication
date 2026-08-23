@@ -25,7 +25,7 @@ const PRAYER_ICONS = {
 };
 
 const EVENTS = [
-  { title: "Jumu'ah Khutbah", date: "Every Friday", time: "1:30 PM", tag: "Weekly", color: "gold" },
+  { title: "Jumu'ah Khutbah", date: "Every Friday", time: "2:30 PM (Adhan 2:00 PM)", tag: "Weekly", color: "gold" },
   { title: "Weekend Islamic School", date: "Every Saturday", time: "10:00 AM", tag: "Education", color: "blue" },
   { title: "Quran Hifz Program", date: "Mon – Thu", time: "6:30 PM", tag: "Quran", color: "green" },
   { title: "Sisters' Halaqah", date: "Every Sunday", time: "11:00 AM", tag: "Community", color: "purple" },
@@ -119,7 +119,7 @@ const IslamicCenterHome = () => {
       fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=2`)
         .then(r => r.json())
         .then(d => setPrayerTimes(d.data.timings))
-        .catch(() => {});
+        .catch(() => { });
     };
 
     const fetchWeather = (lat, lon) => {
@@ -130,7 +130,7 @@ const IslamicCenterHome = () => {
             setWeather(d.current_weather);
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     };
 
     navigator.geolocation.getCurrentPosition(
@@ -172,12 +172,59 @@ const IslamicCenterHome = () => {
     { label: "Contact", id: "contact" },
   ];
 
+  const isFriday = now.getDay() === 5;
+
   return (
     <div style={{ fontFamily: "'Outfit', 'Poppins', sans-serif" }} className="bg-white text-gray-800">
 
+      {/* ── FRIDAY SPECIAL BANNER ── */}
+      {isFriday && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 60,
+            background: "linear-gradient(90deg, #d97706, #eab308, #d97706)",
+            color: "#0f172a",
+            fontWeight: 900,
+            padding: "8px 16px",
+            textAlign: "center",
+            fontSize: "clamp(12px, 2.5vw, 14px)",
+            boxShadow: "0 4px 20px rgba(234, 179, 8, 0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+          }}
+        >
+          <span className="animate-bounce">🕌</span>
+          <span>
+            <strong>✨ TODAY IS FRIDAY — JUMU'AH MUBARAK! ✨</strong> Special Congregation: <strong>Adhan 2:00 PM</strong> · <strong>Iqamah 2:30 PM</strong>
+          </span>
+          <button
+            onClick={() => scrollTo("prayer-times")}
+            style={{
+              background: "#0f172a",
+              color: "#fde68a",
+              border: "none",
+              borderRadius: 9999,
+              padding: "3px 12px",
+              fontSize: 11,
+              fontWeight: 800,
+              cursor: "pointer",
+              marginLeft: 8,
+            }}
+          >
+            View Times ↓
+          </button>
+        </div>
+      )}
+
       {/* ── NAVBAR ── */}
       <nav style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
+        position: "fixed", top: isFriday ? 36 : 0, left: 0, right: 0, zIndex: 50,
         backgroundColor: scrolled ? "#0f172a" : "transparent",
         boxShadow: scrolled ? "0 4px 30px rgba(0,0,0,0.3)" : "none",
         padding: scrolled ? "12px 0" : "20px 0",
@@ -269,7 +316,7 @@ const IslamicCenterHome = () => {
         </div>
 
         <div style={{ position: "relative", zIndex: 10, textAlign: "center", color: "#fff", padding: "100px 24px 60px", maxWidth: 880, margin: "0 auto" }}>
-          
+
           {/* Floating Logo Badge */}
           <div className="animate-float mb-4 inline-block">
             <img
@@ -467,19 +514,77 @@ const IslamicCenterHome = () => {
           </div>
 
           {/* Jumu'ah card */}
-          <div style={{ background: "rgba(234,179,8,0.12)", border: "1px solid rgba(234,179,8,0.3)", borderRadius: 20, padding: "24px 32px", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 20 }}>
+          <div
+            style={{
+              background: isFriday
+                ? "linear-gradient(135deg, rgba(234,179,8,0.25), rgba(217,119,6,0.35), rgba(234,179,8,0.25))"
+                : "rgba(234,179,8,0.12)",
+              border: isFriday ? "2px solid #eab308" : "1px solid rgba(234,179,8,0.3)",
+              borderRadius: 24,
+              padding: "26px 32px",
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 20,
+              position: "relative",
+            }}
+            className={isFriday ? "animate-pulse-glow shadow-2xl shadow-yellow-500/20" : ""}
+          >
+            {isFriday && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: -13,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  background: "#eab308",
+                  color: "#0f172a",
+                  fontSize: 11,
+                  fontWeight: 900,
+                  padding: "4px 16px",
+                  borderRadius: 9999,
+                  letterSpacing: 1,
+                  boxShadow: "0 4px 15px rgba(234,179,8,0.4)",
+                }}
+              >
+                🌟 TODAY IS FRIDAY — JUMU'AH PRAYER TODAY 🌟
+              </div>
+            )}
+
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <span style={{ fontSize: 40 }}>🕌</span>
+              <span style={{ fontSize: 44 }} className={isFriday ? "animate-bounce" : ""}>
+                🕌
+              </span>
               <div>
-                <p style={{ color: "#eab308", fontWeight: 800, fontSize: 18, margin: 0 }}>Jumu'ah — Friday Prayer</p>
-                <p style={{ color: "#6b7280", fontSize: 13, margin: 0 }}>Khutbah begins · Congregation follows</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <p style={{ color: "#eab308", fontWeight: 900, fontSize: 20, margin: 0 }}>
+                    Jumu'ah — Friday Prayer
+                  </p>
+                  {isFriday && (
+                    <span style={{ background: "#4ade80", color: "#0f172a", fontSize: 10, fontWeight: 900, padding: "2px 8px", borderRadius: 9999 }}>
+                      TODAY
+                    </span>
+                  )}
+                </div>
+                <p style={{ color: "#d1d5db", fontSize: 13, margin: "4px 0 0" }}>
+                  Khutbah sermon begins promptly · Followed by 2 Rak'ah congregation
+                </p>
               </div>
             </div>
-            <div style={{ display: "flex", gap: 40 }}>
-              {[["Adhan", "1:15 PM", "#fff"], ["Iqamah", "1:30 PM", "#eab308"]].map(([label, time, color]) => (
+
+            <div style={{ display: "flex", gap: 40, alignItems: "center" }}>
+              {[
+                ["Adhan", "2:00 PM", "#fff"],
+                ["Khutbah & Iqamah", "2:30 PM", "#eab308"],
+              ].map(([label, time, color]) => (
                 <div key={label} style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: 11, color: "#6b7280", margin: "0 0 4px", fontWeight: 600 }}>{label}</p>
-                  <p style={{ fontWeight: 900, fontSize: 22, color, margin: 0 }}>{time}</p>
+                  <p style={{ fontSize: 11, color: "#9ca3af", margin: "0 0 4px", fontWeight: 700, textTransform: "uppercase" }}>
+                    {label}
+                  </p>
+                  <p style={{ fontWeight: 900, fontSize: 24, color, margin: 0, textShadow: isFriday ? "0 0 20px rgba(234,179,8,0.4)" : "none" }}>
+                    {time}
+                  </p>
                 </div>
               ))}
             </div>
