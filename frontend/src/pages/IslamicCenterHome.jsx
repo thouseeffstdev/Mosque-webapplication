@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import Mosque3DWalkthrough from "../components/3d/Mosque3DWalkthrough";
+import Kaaba3DExperience from "../components/3d/Kaaba3DExperience";
 
 /* ─── helpers ─── */
 const to12 = (t) => {
@@ -25,7 +27,7 @@ const PRAYER_ICONS = {
 };
 
 const EVENTS = [
-  { title: "Jumu'ah Khutbah", date: "Every Friday", time: "1:30 PM", tag: "Weekly", color: "gold" },
+  { title: "Jumu'ah Khutbah", date: "Every Friday", time: "2:30 PM (Adhan 2:00 PM)", tag: "Weekly", color: "gold" },
   { title: "Weekend Islamic School", date: "Every Saturday", time: "10:00 AM", tag: "Education", color: "blue" },
   { title: "Quran Hifz Program", date: "Mon – Thu", time: "6:30 PM", tag: "Quran", color: "green" },
   { title: "Sisters' Halaqah", date: "Every Sunday", time: "11:00 AM", tag: "Community", color: "purple" },
@@ -35,9 +37,10 @@ const EVENTS = [
 
 const SERVICES = [
   { icon: "💍", title: "Matrimonial Services", desc: "Connecting Muslim singles within our community with proper Islamic guidance, photo profile, and family involvement.", link: "/nikah" },
+  { icon: "🌟", title: "Kids Islamic Quiz & Adventure", desc: "Interactive Islamic trivia for children and youth of all ages. Win badges, streak scores, and certificates!", link: "/kids-quiz" },
   { icon: "🕌", title: "Funeral / Janazah", desc: "Janazah prayers, ghusl, and burial coordination. We are here for you in your time of need." },
   { icon: "📖", title: "Quran Classes", desc: "Tajweed, Hifz, and Arabic classes for all ages — children through adults." },
-  { icon: "👦", title: "Youth Programs", desc: "Mentorship, sports, Islamic enrichment, and leadership programs for our next generation." },
+  { icon: "👦", title: "Youth Programs", desc: "Mentorship, sports, Islamic enrichment, and leadership programs for our next generation.", link: "/kids-quiz" },
   { icon: "🤲", title: "Charity / Zakat", desc: "Zakat collection and distribution to those in need locally and globally." },
   { icon: "🏫", title: "Weekend School", desc: "Full Islamic studies curriculum for K–12 students every Saturday morning." },
 ];
@@ -100,6 +103,7 @@ const IslamicCenterHome = () => {
   const [now, setNow] = useState(new Date());
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [active3DTab, setActive3DTab] = useState("kaaba"); // "kaaba" | "mosque"
   const heroRef = useRef(null);
 
   useEffect(() => {
@@ -119,7 +123,7 @@ const IslamicCenterHome = () => {
       fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=2`)
         .then(r => r.json())
         .then(d => setPrayerTimes(d.data.timings))
-        .catch(() => {});
+        .catch(() => { });
     };
 
     const fetchWeather = (lat, lon) => {
@@ -130,7 +134,7 @@ const IslamicCenterHome = () => {
             setWeather(d.current_weather);
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     };
 
     navigator.geolocation.getCurrentPosition(
@@ -166,18 +170,66 @@ const IslamicCenterHome = () => {
   const NAV_LINKS = [
     { label: "Home", id: "hero" },
     { label: "About Us", id: "about" },
+    { label: "3D Virtual Tour", id: "virtual-tour" },
     { label: "Prayer Times", id: "prayer-times" },
     { label: "Services", id: "services" },
     { label: "Events", id: "events" },
     { label: "Contact", id: "contact" },
   ];
 
+  const isFriday = now.getDay() === 5;
+
   return (
     <div style={{ fontFamily: "'Outfit', 'Poppins', sans-serif" }} className="bg-white text-gray-800">
 
+      {/* ── FRIDAY SPECIAL BANNER ── */}
+      {isFriday && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 60,
+            background: "linear-gradient(90deg, #d97706, #eab308, #d97706)",
+            color: "#0f172a",
+            fontWeight: 900,
+            padding: "8px 16px",
+            textAlign: "center",
+            fontSize: "clamp(12px, 2.5vw, 14px)",
+            boxShadow: "0 4px 20px rgba(234, 179, 8, 0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+          }}
+        >
+          <span className="animate-bounce">🕌</span>
+          <span>
+            <strong>✨ TODAY IS FRIDAY — JUMU'AH MUBARAK! ✨</strong> Special Congregation: <strong>Adhan 2:00 PM</strong> · <strong>Iqamah 2:30 PM</strong>
+          </span>
+          <button
+            onClick={() => scrollTo("prayer-times")}
+            style={{
+              background: "#0f172a",
+              color: "#fde68a",
+              border: "none",
+              borderRadius: 9999,
+              padding: "3px 12px",
+              fontSize: 11,
+              fontWeight: 800,
+              cursor: "pointer",
+              marginLeft: 8,
+            }}
+          >
+            View Times ↓
+          </button>
+        </div>
+      )}
+
       {/* ── NAVBAR ── */}
       <nav style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
+        position: "fixed", top: isFriday ? 36 : 0, left: 0, right: 0, zIndex: 50,
         backgroundColor: scrolled ? "#0f172a" : "transparent",
         boxShadow: scrolled ? "0 4px 30px rgba(0,0,0,0.3)" : "none",
         padding: scrolled ? "12px 0" : "20px 0",
@@ -202,6 +254,12 @@ const IslamicCenterHome = () => {
                 {l.label}
               </button>
             ))}
+            <button onClick={() => navigate("/kids-quiz")}
+              style={{ background: "rgba(16,185,129,0.18)", color: "#6ee7b7", border: "1px solid rgba(16,185,129,0.4)", fontWeight: 700, padding: "8px 16px", borderRadius: 9999, cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}
+              onMouseOver={e => { e.currentTarget.style.background = "#10b981"; e.currentTarget.style.color = "#0f172a"; }}
+              onMouseOut={e => { e.currentTarget.style.background = "rgba(16,185,129,0.18)"; e.currentTarget.style.color = "#6ee7b7"; }}>
+              <span>🌟</span> Kids Quiz
+            </button>
             <button onClick={() => navigate("/nikah")}
               style={{ background: "rgba(234,179,8,0.15)", color: "#fde68a", border: "1px solid rgba(234,179,8,0.4)", fontWeight: 700, padding: "8px 16px", borderRadius: 9999, cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}
               onMouseOver={e => { e.currentTarget.style.background = "#eab308"; e.currentTarget.style.color = "#0f172a"; }}
@@ -239,6 +297,10 @@ const IslamicCenterHome = () => {
                 {l.label}
               </button>
             ))}
+            <button onClick={() => { setMenuOpen(false); navigate("/kids-quiz"); }}
+              style={{ background: "rgba(16,185,129,0.2)", color: "#6ee7b7", border: "1px solid rgba(16,185,129,0.4)", fontWeight: 700, padding: "10px", borderRadius: 9999, cursor: "pointer", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <span>🌟</span> Kids Islamic Quiz
+            </button>
             <button onClick={() => { setMenuOpen(false); navigate("/nikah"); }}
               style={{ background: "rgba(234,179,8,0.2)", color: "#fde68a", border: "1px solid rgba(234,179,8,0.4)", fontWeight: 700, padding: "10px", borderRadius: 9999, cursor: "pointer", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
               <span>💍</span> Matrimonial & Nikah
@@ -269,7 +331,7 @@ const IslamicCenterHome = () => {
         </div>
 
         <div style={{ position: "relative", zIndex: 10, textAlign: "center", color: "#fff", padding: "100px 24px 60px", maxWidth: 880, margin: "0 auto" }}>
-          
+
           {/* Floating Logo Badge */}
           <div className="animate-float mb-4 inline-block">
             <img
@@ -413,6 +475,89 @@ const IslamicCenterHome = () => {
         </div>
       </section>
 
+      {/* ── 3D VIRTUAL TOUR & MAKKAH KAABA ── */}
+      <section id="virtual-tour" style={{ padding: "90px 24px 70px", background: "#060d1a", position: "relative" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 28 }}>
+            <span style={{ color: "#eab308", fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: 4 }}>
+              Interactive 3D Spiritual Immersion
+            </span>
+            <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.7rem)", fontWeight: 900, color: "#fff", margin: "12px 0 10px" }}>
+              {active3DTab === "kaaba" ? (
+                <>The Holy Kaaba <span style={{ color: "#eab308" }}>Makkah al-Mukarramah in 3D</span></>
+              ) : (
+                <>Step Inside Our Masjid <span style={{ color: "#eab308" }}>in 3D</span></>
+              )}
+            </h2>
+            <p style={{ color: "#9ca3af", fontSize: 14, maxWidth: 660, margin: "0 auto", lineHeight: 1.7 }}>
+              {active3DTab === "kaaba"
+                ? "Experience the sacred Holy Kaaba, the golden Bab al-Kaaba, Hajar al-Aswad, and the continuous Tawaf orbit of pilgrims in Masjid al-Haram."
+                : "Experience walking through our grand arched entrance, past the marble pillars and glowing lanterns, directly into the prayer hall towards the Mihrab."}
+            </p>
+          </div>
+
+          {/* 3D Tab Switcher */}
+          <div style={{ display: "flex", justifyContent: "center", gap: 12, marginBottom: 28, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              onClick={() => setActive3DTab("kaaba")}
+              style={{
+                background: active3DTab === "kaaba" ? "linear-gradient(135deg, #eab308, #ca8a04)" : "rgba(255,255,255,0.06)",
+                color: active3DTab === "kaaba" ? "#0f172a" : "#d1d5db",
+                fontWeight: 900,
+                fontSize: 14,
+                padding: "12px 24px",
+                borderRadius: 9999,
+                border: active3DTab === "kaaba" ? "2px solid #fde047" : "1px solid rgba(255,255,255,0.15)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                boxShadow: active3DTab === "kaaba" ? "0 10px 30px rgba(234,179,8,0.35)" : "none",
+                transform: active3DTab === "kaaba" ? "scale(1.04)" : "scale(1)",
+                transition: "all 0.3s ease",
+              }}
+            >
+              <span style={{ fontSize: 18 }}>🕋</span>
+              <span>Holy Kaaba (Makkah)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActive3DTab("mosque")}
+              style={{
+                background: active3DTab === "mosque" ? "linear-gradient(135deg, #eab308, #ca8a04)" : "rgba(255,255,255,0.06)",
+                color: active3DTab === "mosque" ? "#0f172a" : "#d1d5db",
+                fontWeight: 900,
+                fontSize: 14,
+                padding: "12px 24px",
+                borderRadius: 9999,
+                border: active3DTab === "mosque" ? "2px solid #fde047" : "1px solid rgba(255,255,255,0.15)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                boxShadow: active3DTab === "mosque" ? "0 10px 30px rgba(234,179,8,0.35)" : "none",
+                transform: active3DTab === "mosque" ? "scale(1.04)" : "scale(1)",
+                transition: "all 0.3s ease",
+              }}
+            >
+              <span style={{ fontSize: 18 }}>🕌</span>
+              <span>Mosque Entrance Walkthrough</span>
+            </button>
+          </div>
+
+          {/* 3D Render Canvas Container */}
+          <div>
+            {active3DTab === "kaaba" ? (
+              <Kaaba3DExperience />
+            ) : (
+              <Mosque3DWalkthrough />
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* ── PRAYER TIMES ── */}
       <section id="prayer-times" style={{ padding: "90px 24px", background: "#0f172a", position: "relative", overflow: "hidden" }}>
         <div style={{ maxWidth: 1000, margin: "0 auto", position: "relative", zIndex: 10 }}>
@@ -467,19 +612,77 @@ const IslamicCenterHome = () => {
           </div>
 
           {/* Jumu'ah card */}
-          <div style={{ background: "rgba(234,179,8,0.12)", border: "1px solid rgba(234,179,8,0.3)", borderRadius: 20, padding: "24px 32px", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 20 }}>
+          <div
+            style={{
+              background: isFriday
+                ? "linear-gradient(135deg, rgba(234,179,8,0.25), rgba(217,119,6,0.35), rgba(234,179,8,0.25))"
+                : "rgba(234,179,8,0.12)",
+              border: isFriday ? "2px solid #eab308" : "1px solid rgba(234,179,8,0.3)",
+              borderRadius: 24,
+              padding: "26px 32px",
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 20,
+              position: "relative",
+            }}
+            className={isFriday ? "animate-pulse-glow shadow-2xl shadow-yellow-500/20" : ""}
+          >
+            {isFriday && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: -13,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  background: "#eab308",
+                  color: "#0f172a",
+                  fontSize: 11,
+                  fontWeight: 900,
+                  padding: "4px 16px",
+                  borderRadius: 9999,
+                  letterSpacing: 1,
+                  boxShadow: "0 4px 15px rgba(234,179,8,0.4)",
+                }}
+              >
+                🌟 TODAY IS FRIDAY — JUMU'AH PRAYER TODAY 🌟
+              </div>
+            )}
+
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <span style={{ fontSize: 40 }}>🕌</span>
+              <span style={{ fontSize: 44 }} className={isFriday ? "animate-bounce" : ""}>
+                🕌
+              </span>
               <div>
-                <p style={{ color: "#eab308", fontWeight: 800, fontSize: 18, margin: 0 }}>Jumu'ah — Friday Prayer</p>
-                <p style={{ color: "#6b7280", fontSize: 13, margin: 0 }}>Khutbah begins · Congregation follows</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <p style={{ color: "#eab308", fontWeight: 900, fontSize: 20, margin: 0 }}>
+                    Jumu'ah — Friday Prayer
+                  </p>
+                  {isFriday && (
+                    <span style={{ background: "#4ade80", color: "#0f172a", fontSize: 10, fontWeight: 900, padding: "2px 8px", borderRadius: 9999 }}>
+                      TODAY
+                    </span>
+                  )}
+                </div>
+                <p style={{ color: "#d1d5db", fontSize: 13, margin: "4px 0 0" }}>
+                  Khutbah sermon begins promptly · Followed by 2 Rak'ah congregation
+                </p>
               </div>
             </div>
-            <div style={{ display: "flex", gap: 40 }}>
-              {[["Adhan", "1:15 PM", "#fff"], ["Iqamah", "1:30 PM", "#eab308"]].map(([label, time, color]) => (
+
+            <div style={{ display: "flex", gap: 40, alignItems: "center" }}>
+              {[
+                ["Adhan", "2:00 PM", "#fff"],
+                ["Khutbah & Iqamah", "2:30 PM", "#eab308"],
+              ].map(([label, time, color]) => (
                 <div key={label} style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: 11, color: "#6b7280", margin: "0 0 4px", fontWeight: 600 }}>{label}</p>
-                  <p style={{ fontWeight: 900, fontSize: 22, color, margin: 0 }}>{time}</p>
+                  <p style={{ fontSize: 11, color: "#9ca3af", margin: "0 0 4px", fontWeight: 700, textTransform: "uppercase" }}>
+                    {label}
+                  </p>
+                  <p style={{ fontWeight: 900, fontSize: 24, color, margin: 0, textShadow: isFriday ? "0 0 20px rgba(234,179,8,0.4)" : "none" }}>
+                    {time}
+                  </p>
                 </div>
               ))}
             </div>

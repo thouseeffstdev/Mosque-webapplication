@@ -12,6 +12,7 @@ import ManageUser from "../pages/ManageUser";
 import ViewDonations from "../pages/ViewDonations";
 import Events from "../pages/Events";
 import MatrimonialService from "../pages/MatrimonialService";
+import KidsIslamicQuiz from "../pages/KidsIslamicQuiz";
 
 function AppRouter() {
   return (
@@ -33,6 +34,7 @@ function AppRouter() {
       <Route path="/events" element={<Events />} />
       <Route path="/matrimonial" element={<MatrimonialService />} />
       <Route path="/nikah" element={<MatrimonialService />} />
+      <Route path="/kids-quiz" element={<KidsIslamicQuiz />} />
 
       <Route path="/superadmin" element={<SuperAdminLogin />} />
       <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
